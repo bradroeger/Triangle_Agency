@@ -1,0 +1,390 @@
+:root {
+  font-family: Arial, sans-serif;
+  color: #17110f;
+  background: #f0e7d4;
+  --red: #ed1c24;
+}
+* {
+  box-sizing: border-box;
+}
+.digit-three {
+  color: #ed1c24 !important;
+  text-shadow: none !important;
+}
+body {
+  margin: 0;
+}
+header {
+  display: grid;
+  grid-template-columns: auto 1fr auto auto;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 3vw;
+  color: white;
+  background: #17110f;
+  border-bottom: 10px solid var(--red);
+}
+.header-action {
+  margin: 0;
+  background: var(--red);
+  box-shadow: none;
+}
+.employee-dialog {
+  width: min(1050px, 94vw);
+  max-height: 92vh;
+  padding: 0;
+  color: #17110f;
+  background: #f0e7d4;
+  border: 5px solid #17110f;
+  box-shadow: 12px 12px 0 var(--red);
+}
+.employee-dialog::backdrop {
+  background: rgba(10, 7, 6, 0.74);
+  backdrop-filter: blur(2px);
+}
+.employee-dialog form {
+  padding: 1.2rem;
+}
+.dialog-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-bottom: 0.7rem;
+  border-bottom: 8px solid var(--red);
+}
+.dialog-heading span {
+  color: #9c0710;
+  font:
+    700 0.62rem "Courier New",
+    monospace;
+  letter-spacing: 0.12em;
+}
+.dialog-heading h2 {
+  margin: 0.25rem 0 0;
+  font-size: 1.35rem;
+}
+.dialog-heading button,
+.dialog-actions button {
+  margin: 0;
+}
+.employee-dialog > form > p {
+  font:
+    0.75rem/1.45 "Courier New",
+    monospace;
+}
+.employee-dialog fieldset {
+  margin: 1rem 0;
+  padding: 0.9rem;
+  border: 3px solid #17110f;
+  background: #fff9eb;
+}
+.employee-dialog legend {
+  padding: 0.25rem 0.55rem;
+  color: #fff;
+  background: #17110f;
+  font:
+    900 0.68rem "Courier New",
+    monospace;
+  letter-spacing: 0.1em;
+}
+.employee-form-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+.employee-check-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.6rem;
+  margin-top: 0.9rem;
+}
+.employee-check-grid label {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.55rem;
+  border: 2px solid #17110f;
+  background: #f0e7d4;
+}
+.employee-check-grid input {
+  flex: 0 0 auto;
+  width: 1rem;
+  height: 1rem;
+  margin: 0;
+}
+.wide-field {
+  display: block;
+  margin-top: 0.9rem;
+}
+textarea {
+  width: 100%;
+  margin-top: 0.25rem;
+  padding: 0.55rem;
+  resize: vertical;
+  color: #17110f;
+  background: #f6eedc;
+  border: 2px solid #17110f;
+  font:
+    0.78rem "Courier New",
+    monospace;
+}
+.dialog-actions {
+  display: flex;
+  gap: 0.8rem;
+  justify-content: flex-end;
+}
+.dialog-actions button:last-child,
+.dialog-heading button {
+  background: #17110f;
+}
+header span {
+  font-weight: 900;
+  color: var(--red);
+  letter-spacing: 0.15em;
+}
+h1 {
+  margin: 0;
+  font-size: 1.2rem;
+  letter-spacing: 0.12em;
+}
+a {
+  color: white;
+}
+main {
+  width: min(1200px, 94%);
+  margin: 2rem auto;
+}
+.warning {
+  padding: 0.7rem;
+  color: white;
+  background: var(--red);
+  font:
+    700 0.75rem "Courier New",
+    monospace;
+}
+section {
+  margin: 1.2rem 0;
+  padding: 1rem;
+  background: #fff9eb;
+  border: 3px solid #17110f;
+  box-shadow: 5px 5px 0 var(--red);
+}
+h2 {
+  margin: 0 0 1rem;
+  font-size: 0.8rem;
+  letter-spacing: 0.15em;
+}
+h3 {
+  color: #9c0710;
+  font-size: 0.7rem;
+}
+.columns {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+pre {
+  max-height: 240px;
+  overflow: auto;
+  white-space: pre-wrap;
+  font-size: 0.72rem;
+}
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.8rem;
+}
+label {
+  font:
+    700 0.65rem "Courier New",
+    monospace;
+}
+input,
+select {
+  width: 100%;
+  margin-top: 0.25rem;
+  padding: 0.55rem;
+  border: 2px solid #17110f;
+  background: #f6eedc;
+}
+button {
+  margin-top: 0.8rem;
+  padding: 0.65rem 0.8rem;
+  border: 2px solid #17110f;
+  color: white;
+  background: var(--red);
+  font-weight: 900;
+  box-shadow: 3px 3px 0 #17110f;
+  cursor: pointer;
+}
+button:hover {
+  background: #17110f;
+}
+.operations {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  align-items: end;
+}
+.operations input {
+  width: 180px;
+}
+.danger {
+  background: #760009;
+}
+#result {
+  min-height: 1.5rem;
+  font:
+    700 0.8rem "Courier New",
+    monospace;
+}
+.playwall-manager {
+  border-top: 12px solid var(--red);
+}
+.reminder-manager {
+  border-top: 12px solid #17110f;
+}
+.reminder-manager > p {
+  font:
+    0.75rem/1.4 "Courier New",
+    monospace;
+}
+.reminder-controls {
+  display: grid;
+  grid-template-columns: minmax(190px, 1fr) minmax(280px, 2fr) auto;
+  align-items: end;
+  gap: 0.8rem;
+}
+.reminder-controls button {
+  margin: 0;
+}
+.reminder-list {
+  display: grid;
+  gap: 0.55rem;
+  margin-top: 0.8rem;
+}
+.reminder-list article {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 0.6rem;
+  background: #f6eedc;
+  border: 2px solid #17110f;
+}
+.reminder-list article span {
+  font:
+    0.75rem/1.35 "Courier New",
+    monospace;
+}
+.reminder-list button {
+  margin: 0;
+  padding: 0.35rem 0.5rem;
+  background: #760009;
+  box-shadow: 2px 2px #17110f;
+  font-size: 0.58rem;
+}
+.playwall-heading,
+.assigned-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 1rem;
+  border-bottom: 2px solid #17110f;
+}
+.playwall-heading span {
+  color: #9c0710;
+  font:
+    700 0.65rem "Courier New",
+    monospace;
+  letter-spacing: 0.15em;
+}
+.playwall-heading h2 {
+  margin: 0.25rem 0 0.65rem;
+  font-size: 1.25rem;
+}
+.playwall-heading > strong {
+  margin-bottom: 0.65rem;
+  padding: 0.35rem 0.55rem;
+  color: white;
+  background: var(--red);
+  font:
+    700 0.7rem "Courier New",
+    monospace;
+}
+.playwall-manager > p {
+  font:
+    0.75rem/1.4 "Courier New",
+    monospace;
+}
+.playwall-controls {
+  display: grid;
+  grid-template-columns: minmax(190px, 1fr) minmax(240px, 1.5fr) auto;
+  align-items: end;
+  gap: 0.8rem;
+}
+.playwall-controls button {
+  margin: 0;
+}
+.assigned-heading {
+  margin-top: 1.2rem;
+}
+.assigned-heading h3 {
+  margin-bottom: 0.5rem;
+}
+.assigned-heading span {
+  margin-bottom: 0.5rem;
+  font:
+    700 0.65rem "Courier New",
+    monospace;
+}
+.playwall-assigned {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.55rem;
+  margin-top: 0.8rem;
+}
+.playwall-assigned article {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.5rem;
+  border: 2px solid #17110f;
+  background: #f6eedc;
+}
+.playwall-assigned article > strong {
+  color: white;
+  background: var(--red);
+  padding: 0.35rem;
+}
+.playwall-assigned article span {
+  font-size: 0.72rem;
+}
+.playwall-assigned button {
+  margin: 0;
+  padding: 0.35rem 0.5rem;
+  background: #760009;
+  box-shadow: 2px 2px #17110f;
+  font-size: 0.58rem;
+}
+.inline-result {
+  min-height: 1rem;
+  color: #760009;
+  font-weight: 700 !important;
+}
+@media (max-width: 760px) {
+  header,
+  .columns,
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+  .reminder-controls {
+    grid-template-columns: 1fr;
+  }
+  .employee-form-grid,
+  .employee-check-grid {
+    grid-template-columns: 1fr;
+  }
+}

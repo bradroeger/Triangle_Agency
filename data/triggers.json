@@ -1,0 +1,46 @@
+{
+  "first-archive-access": {
+    "enabled": true,
+    "priority": 100,
+    "once": true,
+    "conditions": {
+      "event": "ACCESS_GRANTED",
+      "resourceId": "evidence-archive",
+      "employeeId": "TA-0417",
+      "triggerPreviouslyExecuted": false
+    },
+    "actions": [
+      { "type": "UNLOCK_CONTENT", "contentId": "archive-warning" },
+      { "type": "DISPLAY_CONTENT", "contentId": "archive-warning" },
+      { "type": "SET_FLAG", "flag": "archive-warning-seen", "value": true },
+      { "type": "SET_EMPLOYEE_CLEARANCE", "clearance": 3 }
+    ]
+  },
+  "failed-containment-access": {
+    "enabled": true,
+    "priority": 50,
+    "once": false,
+    "conditions": {
+      "event": "ACCESS_DENIED",
+      "resourceId": "containment-floor",
+      "reasonCode": "INSUFFICIENT_CLEARANCE"
+    },
+    "actions": [
+      {
+        "type": "INCREMENT_FLAG",
+        "flag": "containment-access-attempts",
+        "amount": 1
+      },
+      {
+        "type": "DISPLAY_MESSAGE",
+        "title": "NOTICE",
+        "classification": "INTERNAL",
+        "audience": "PUBLIC",
+        "body": [
+          "Repeated access attempts are interpreted as enthusiasm.",
+          "Your supervisor has been informed."
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 400" role="img" aria-labelledby="title description">
+  <title id="title">Redacted placeholder employee portrait</title>
+  <desc id="description">A cream personnel card with a red triangle and black redaction bars.</desc>
+  <rect width="640" height="400" fill="#f6eedc"/>
+  <path d="M320 42 478 316H162Z" fill="#ed1c24"/>
+  <circle cx="320" cy="165" r="55" fill="#15100e"/>
+  <path d="M220 310c14-79 62-116 100-116s86 37 100 116" fill="#15100e"/>
+  <rect x="106" y="124" width="428" height="35" fill="#15100e"/>
+  <rect x="76" y="330" width="488" height="24" fill="#15100e"/>
+</svg>

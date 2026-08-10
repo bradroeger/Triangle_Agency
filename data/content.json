@@ -1,0 +1,110 @@
+{
+  "orientation-document": {
+    "type": "document",
+    "title": "Mandatory Employee Orientation",
+    "classification": "INTERNAL",
+    "audience": "PUBLIC",
+    "body": [
+      "Your continued employment is evidence of satisfactory performance.",
+      "Do not discuss the west stairwell with yourself."
+    ]
+  },
+  "archive-warning": {
+    "type": "message",
+    "title": "Archive Notice",
+    "classification": "RESTRICTED",
+    "audience": "SCANNED_EMPLOYEE",
+    "body": [
+      "This record has already been viewed by you.",
+      "Failure to remember doing so has been noted."
+    ]
+  },
+  "placeholder-portrait": {
+    "type": "image",
+    "title": "Personnel Photograph",
+    "classification": "CONFIDENTIAL",
+    "audience": "SUPERVISOR",
+    "asset": "placeholder-portrait.svg",
+    "alt": "A redacted placeholder employee portrait."
+  },
+  "office-eye": {
+    "type": "image",
+    "title": "Incursion Eye",
+    "classification": "RESTRICTED",
+    "audience": "PUBLIC",
+    "asset": "eye.svg",
+    "alt": "A flat blue and white eye symbol."
+  },
+  "office-crack-mask": {
+    "type": "image",
+    "title": "Signal Rupture Mask",
+    "classification": "RESTRICTED",
+    "audience": "PUBLIC",
+    "asset": "crack.svg",
+    "alt": "A jagged full-height signal rupture."
+  },
+  "office-incident-eye": {
+    "type": "image",
+    "title": "Incident Eye",
+    "classification": "RESTRICTED",
+    "audience": "PUBLIC",
+    "asset": "incident-eye.png",
+    "alt": "A harsh blue eye degraded by analogue signal damage."
+  },
+  "office-error-popup": {
+    "type": "audio",
+    "title": "Office Error Popup",
+    "audience": "PUBLIC",
+    "asset": "office/erro.mp3"
+  },
+  "office-eye-static": {
+    "type": "audio",
+    "title": "Office Eye Static",
+    "audience": "PUBLIC",
+    "asset": "office/Static.wav"
+  },
+  "office-eye-swoosh": {
+    "type": "audio",
+    "title": "Office Eye Swoosh",
+    "audience": "PUBLIC",
+    "asset": "office/Swoosh.mp3"
+  },
+  "office-terminal-open": {
+    "type": "audio",
+    "title": "AgencyOS Terminal Open",
+    "audience": "PUBLIC",
+    "asset": "office/terminal_open.wav"
+  },
+  "office-terminal-scanning": {
+    "type": "audio",
+    "title": "AgencyOS Scanning Loop",
+    "audience": "PUBLIC",
+    "asset": "office/scanning.mp3"
+  },
+  "office-boot-up": {
+    "type": "audio",
+    "title": "AgencyOS Boot Sequence",
+    "audience": "PUBLIC",
+    "asset": "office/boot-up.mp3"
+  },
+  "office-blackout-presence": {
+    "type": "image",
+    "title": "Blackout Presence",
+    "classification": "RESTRICTED",
+    "audience": "PUBLIC",
+    "asset": "office/blackout-presence-v2.png",
+    "alt": "A four-armed office figure observing and making notes."
+  },
+  "office-error-loop": {
+    "type": "audio",
+    "title": "Incident Error Loop",
+    "audience": "PUBLIC",
+    "asset": "office/error_loop.mp3"
+  },
+  "office-bootup-screen": {
+    "type": "audio",
+    "title": "AgencyOS Screen Boot",
+    "audience": "PUBLIC",
+    "asset": "office/Bootup_screen.mp3"
+  }
+}

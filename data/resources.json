@@ -1,0 +1,58 @@
+{
+  "evidence-archive": {
+    "name": "Evidence Archive",
+    "description": "Archived evidence and recovered anomalous materials.",
+    "minimumClearance": 2,
+    "allowedDepartments": [],
+    "allowedStatuses": ["ACTIVE", "PROBATION"],
+    "enabled": true
+  },
+  "containment-floor": {
+    "name": "Containment Floor",
+    "description": "Restricted containment and observation facilities.",
+    "minimumClearance": 3,
+    "allowedDepartments": ["Containment", "Operations"],
+    "allowedStatuses": ["ACTIVE"],
+    "enabled": true
+  },
+  "mission-briefing": {
+    "name": "Mission Briefing",
+    "description": "Operational briefings and mandatory team alignment.",
+    "minimumClearance": 1,
+    "allowedDepartments": [],
+    "allowedStatuses": ["ACTIVE", "PROBATION"],
+    "enabled": true
+  },
+  "break-room": {
+    "name": "Break Room",
+    "description": "Employee refreshments, personal messages, and approved periods of reflection.",
+    "minimumClearance": 0,
+    "allowedDepartments": [],
+    "allowedStatuses": ["ACTIVE", "PROBATION"],
+    "enabled": true
+  },
+  "personnel-records": {
+    "name": "Personnel Records",
+    "description": "Confidential employee histories and performance narratives.",
+    "minimumClearance": 2,
+    "allowedDepartments": [],
+    "allowedStatuses": ["ACTIVE"],
+    "enabled": true
+  },
+  "secure-lift": {
+    "name": "Secure Lift",
+    "description": "Vertical transport to controlled Agency floors.",
+    "minimumClearance": 2,
+    "allowedDepartments": [],
+    "allowedStatuses": ["ACTIVE"],
+    "enabled": true
+  },
+  "executive-washroom": {
+    "name": "Executive Washroom",
+    "description": "Executive hygiene and strategic reflection facility.",
+    "minimumClearance": 7,
+    "allowedDepartments": ["Executive"],
+    "allowedStatuses": ["ACTIVE"],
+    "enabled": true
+  }
+}

@@ -1,0 +1,128 @@
+{
+  "537220B7960001": {
+    "employeeId": "TA-0417",
+    "name": "Agent Pendleton",
+    "department": "Containment",
+    "status": "ACTIVE",
+    "clearance": 2,
+    "role": "Field Agent",
+    "anomalyDesignation": "NONE ASSIGNED",
+    "dependant": "your registered dependant",
+    "dependantContact": {
+      "methods": [],
+      "urgent": false
+    },
+    "demerits": 1,
+    "commendations": 4,
+    "anomalyDanger": 1,
+    "loyalty": 5,
+    "nonHuman": false,
+    "anomalousEmployee": false,
+    "realityCompromised": false,
+    "containmentRequired": false,
+    "permissions": {
+      "allow": ["personnel-records"],
+      "deny": ["secure-lift"]
+    }
+  },
+  "A1B2C3D4": {
+    "employeeId": "TA-0182",
+    "name": "Agent Hand",
+    "department": "Acquisitions",
+    "status": "PROBATION",
+    "clearance": 1,
+    "role": "Acquisitions Agent",
+    "anomalyDesignation": "PENDING REVIEW",
+    "dependant": "your registered dependant",
+    "dependantContact": {
+      "methods": [],
+      "urgent": false
+    },
+    "demerits": 3,
+    "commendations": 1,
+    "anomalyDanger": 1,
+    "loyalty": 5,
+    "nonHuman": false,
+    "anomalousEmployee": false,
+    "realityCompromised": false,
+    "containmentRequired": false
+  },
+  "04A7812C966182": {
+    "employeeId": "TA-0923",
+    "name": "Agent Douglas",
+    "department": "Research",
+    "status": "ACTIVE",
+    "clearance": 3,
+    "role": "Research Specialist",
+    "anomalyDesignation": "SCP-173",
+    "dependant": "your registered dependant",
+    "dependantContact": {
+      "methods": [],
+      "urgent": false
+    },
+    "demerits": 0,
+    "commendations": 5,
+    "anomalyDanger": 1,
+    "loyalty": 5,
+    "nonHuman": false,
+    "anomalousEmployee": false,
+    "realityCompromised": false,
+    "containmentRequired": false,
+    "permissions": {
+      "allow": [],
+      "deny": []
+    }
+  },
+  "04A7812C966183": {
+    "employeeId": "TA-0564",
+    "name": "Agent Speek",
+    "department": "Containment",
+    "status": "ACTIVE",
+    "clearance": 4,
+    "role": "Containment Specialist",
+    "anomalyDesignation": "SCP-096",
+    "dependant": "your registered dependant",
+    "dependantContact": {
+      "methods": [],
+      "urgent": false
+    },
+    "demerits": 0,
+    "commendations": 6,
+    "anomalyDanger": 1,
+    "loyalty": 5,
+    "nonHuman": false,
+    "anomalousEmployee": false,
+    "realityCompromised": false,
+    "containmentRequired": false,
+    "permissions": {
+      "allow": [],
+      "deny": []
+    }
+  },
+  "04A7812C966184": {
+    "employeeId": "TA-0741",
+    "name": "Agent Pilot",
+    "department": "Research",
+    "status": "ACTIVE",
+    "clearance": 2,
+    "role": "Research Analyst",
+    "anomalyDesignation": "SCP-049",
+    "dependant": "your registered dependant",
+    "dependantContact": {
+      "methods": [],
+      "urgent": false
+    },
+    "demerits": 2,
+    "commendations": 3,
+    "anomalyDanger": 1,
+    "loyalty": 5,
+    "nonHuman": false,
+    "anomalousEmployee": false,
+    "realityCompromised": false,
+    "containmentRequired": false,
+    "permissions": {
+      "allow": [],
+      "deny": []
+    }
+  }
+}

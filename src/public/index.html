@@ -1,0 +1,329 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Triangle Agency Identification Terminal</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <div class="classification-bar" aria-hidden="true">
+      <span>STABILIZE REALITY</span><span>CONTROL YOURSELF</span
+      ><span>FORM TA-91</span>
+    </div>
+    <main class="terminal">
+      <div class="triangle-field" aria-hidden="true"><i></i><i></i><i></i></div>
+      <header>
+        <button
+          id="test-mode-reveal"
+          class="agency-mark"
+          type="button"
+          aria-label="Reveal test controls"
+        >
+          <span></span>
+        </button>
+        <div>
+          <p class="agency">TRIANGLE AGENCY</p>
+          <h1>ACCESS CONTROL TERMINAL</h1>
+        </div>
+        <p class="terminal-id">TERMINAL<br /><strong>03-A</strong></p>
+      </header>
+
+      <section
+        class="resource-control"
+        aria-label="Authorised destination selection"
+      >
+        <div class="resource-picker">
+          <label for="resource-select">AUTHORISED DESTINATION</label>
+          <select id="resource-select">
+            <option value="">NO RESOURCE SELECTED</option>
+          </select>
+          <button id="clear-resource" type="button">CLEAR</button>
+        </div>
+        <div id="resource-details" class="resource-details" hidden>
+          <strong id="resource-name"></strong>
+          <span id="resource-description"></span>
+          <dl>
+            <div>
+              <dt>MINIMUM</dt>
+              <dd id="resource-clearance"></dd>
+            </div>
+            <div>
+              <dt>DEPARTMENTS</dt>
+              <dd id="resource-departments"></dd>
+            </div>
+            <div>
+              <dt>STATUSES</dt>
+              <dd id="resource-statuses"></dd>
+            </div>
+            <div>
+              <dt>AVAILABILITY</dt>
+              <dd id="resource-enabled"></dd>
+            </div>
+          </dl>
+        </div>
+      </section>
+
+      <section class="display-frame">
+        <div class="frame-label" aria-hidden="true">
+          IDENTIFICATION SERVICES / A BETTER YOU BEGINS HERE
+        </div>
+        <div class="display" aria-live="polite">
+          <p class="prompt-code" aria-hidden="true">
+            THANK YOU FOR CHOOSING STABILITY™
+          </p>
+          <p id="status" class="status">READER OFFLINE</p>
+          <p id="instruction" class="instruction">
+            Connect authorised identification hardware.
+          </p>
+          <div id="badge" class="badge" hidden>
+            <span>BADGE UID</span>
+            <strong id="uid"></strong>
+          </div>
+          <div id="employee" class="employee" hidden>
+            <strong id="employee-name" class="employee-name"></strong>
+            <dl>
+              <div>
+                <dt>EMPLOYEE ID</dt>
+                <dd id="employee-id"></dd>
+              </div>
+              <div>
+                <dt>DEPARTMENT</dt>
+                <dd id="employee-department"></dd>
+              </div>
+              <div>
+                <dt>CLEARANCE</dt>
+                <dd id="employee-clearance"></dd>
+              </div>
+              <div>
+                <dt>EMPLOYMENT STATUS</dt>
+                <dd>
+                  <span id="employee-status" class="employment-status"></span>
+                </dd>
+              </div>
+            </dl>
+          </div>
+          <div id="unknown" class="unknown" hidden>
+            <strong>UNREGISTERED CREDENTIAL</strong>
+            <span
+              >Remain at the terminal.<br />A representative has been
+              notified.</span
+            >
+          </div>
+          <div id="no-resource" class="no-resource" hidden>
+            <strong>NO RESOURCE SELECTED</strong>
+            <span
+              >Select an authorised destination<br />before presenting
+              identification.</span
+            >
+          </div>
+          <div
+            id="personnel-notification"
+            class="personnel-notification"
+            hidden
+          >
+            <strong>NEW PERSONNEL FILE AVAILABLE</strong>
+            <span id="personnel-notification-detail"></span>
+            <small
+              >Select Personnel Records and present identification to
+              review.</small
+            >
+          </div>
+          <div id="access-result" class="access-result" hidden>
+            <div>
+              <span>REQUESTED RESOURCE</span
+              ><strong id="access-resource"></strong>
+            </div>
+            <div>
+              <span id="access-reason-label">REASON</span
+              ><strong id="access-reason"></strong>
+            </div>
+            <div id="access-levels">
+              <span>REQUIRED / CURRENT</span
+              ><strong id="access-clearance"></strong>
+            </div>
+            <p id="access-message"></p>
+          </div>
+        </div>
+      </section>
+
+      <section id="personnel-records" class="personnel-records" hidden>
+        <div class="personnel-records-heading">
+          <div>
+            <span>CONTROLLED DOCUMENT INDEX</span>
+            <h2>PERSONNEL RECORDS</h2>
+          </div>
+          <strong>AGENCY // RED</strong>
+        </div>
+        <p id="personnel-records-status"></p>
+        <div id="personnel-records-list" class="personnel-records-list"></div>
+      </section>
+
+      <section id="break-room" class="break-room" hidden>
+        <div class="break-room-heading">
+          <span>EMPLOYEE WELFARE ANNEX // PERSONAL CORRESPONDENCE</span>
+          <h2>BREAK ROOM</h2>
+        </div>
+        <p id="break-room-status"></p>
+        <aside id="while-you-were-out" class="while-you-were-out" hidden>
+          <div class="message-pad-fields">
+            <p class="message-pad-for">
+              <strong>FOR</strong><span id="break-room-to"></span>
+              <label class="message-check urgent-check"
+                ><input id="break-room-urgent" type="checkbox" disabled />
+                URGENT</label
+              >
+            </p>
+            <p>
+              <strong>DATE</strong><span id="break-room-date"></span>
+              <strong>TIME</strong><span id="break-room-time"></span>
+            </p>
+          </div>
+          <h3>While You Were Out</h3>
+          <div class="message-pad-details">
+            <div class="caller-fields">
+              <p><strong>FROM</strong><span id="break-room-from"></span></p>
+              <p><strong>OF</strong><span>PERSONAL</span></p>
+              <p><strong>PHONE</strong><span id="break-room-phone"></span></p>
+            </div>
+            <fieldset class="contact-checks">
+              <legend>CONTACT DETAILS</legend>
+              <label class="message-check"
+                ><input data-contact="telephone" type="checkbox" disabled />
+                TELEPHONED</label
+              >
+              <label class="message-check"
+                ><input
+                  data-contact="came-to-see-you"
+                  type="checkbox"
+                  disabled
+                />
+                CAME TO SEE YOU</label
+              >
+              <label class="message-check"
+                ><input data-contact="please-call" type="checkbox" disabled />
+                PLEASE CALL</label
+              >
+              <label class="message-check"
+                ><input data-contact="will-call" type="checkbox" disabled />
+                WILL CALL AGAIN</label
+              >
+              <label class="message-check"
+                ><input
+                  data-contact="wants-to-see-you"
+                  type="checkbox"
+                  disabled
+                />
+                WANTS TO SEE YOU</label
+              >
+              <label class="message-check"
+                ><input data-contact="left-package" type="checkbox" disabled />
+                LEFT A PACKAGE</label
+              >
+            </fieldset>
+          </div>
+          <div class="message-field">
+            <strong>Message</strong>
+            <img id="break-room-message-image" alt="" />
+          </div>
+          <footer>
+            <button id="break-room-previous" type="button">PREVIOUS</button>
+            <span id="break-room-counter"></span>
+            <button id="break-room-next" type="button">NEXT</button>
+          </footer>
+        </aside>
+      </section>
+
+      <section
+        id="content-viewer"
+        class="content-viewer"
+        hidden
+        aria-live="polite"
+      >
+        <div class="content-heading">
+          <span id="content-classification"></span>
+          <span id="content-counter"></span>
+        </div>
+        <h2 id="content-title"></h2>
+        <div id="content-body"></div>
+        <img id="content-image" hidden alt="" />
+        <p id="content-media-error" class="content-media-error" hidden></p>
+        <div class="content-actions">
+          <button id="content-acknowledge" type="button">ACKNOWLEDGE</button>
+          <button id="content-return" type="button">RETURN TO RESULT</button>
+        </div>
+      </section>
+
+      <div class="controls">
+        <span id="connection" class="connection offline">● READER OFFLINE</span>
+        <div class="control-buttons">
+          <button
+            id="test-mode-toggle"
+            type="button"
+            aria-pressed="false"
+            hidden
+          >
+            ENABLE TEST MODE
+          </button>
+          <button id="enable-audio" type="button" aria-pressed="true">
+            DISABLE AUDIO
+          </button>
+        </div>
+      </div>
+
+      <section id="test-panel" class="test-panel" hidden>
+        <div>
+          <strong>SIMULATED READER // TEST MODE</strong>
+          <span>No PC/SC hardware activity is generated.</span>
+        </div>
+        <label for="test-uid">FAKE BADGE UID</label>
+        <input
+          id="test-uid"
+          value="04A7812C966180"
+          inputmode="text"
+          autocomplete="off"
+        />
+        <button id="present-test-badge" type="button">PRESENT CARD</button>
+        <button id="remove-test-badge" type="button">REMOVE CARD</button>
+      </section>
+
+      <section class="log" aria-label="Recent local events">
+        <div class="log-heading">
+          <h2>ACTIVITY RECEIPT</h2>
+          <span>YOUR ACTIONS MATTER™</span>
+        </div>
+        <ol id="events"></ol>
+      </section>
+    </main>
+    <aside
+      id="containment-notification"
+      class="containment-notification"
+      hidden
+      data-echo="UNAUTHORISED FILE PRESENCE"
+    >
+      <img src="/content-assets/office-eye" alt="" />
+      <div>
+        <strong>CONTAINED FILE DETECTED</strong>
+        <span id="containment-notification-detail"></span>
+        <small>THIS MESSAGE DOES NOT BELONG TO AGENCYOS</small>
+      </div>
+    </aside>
+    <aside id="containment-vault" class="containment-vault" hidden>
+      <span id="containment-vault-status"></span>
+      <button id="containment-vault-open" type="button">
+        <img src="/content-assets/office-eye" alt="" />
+        OPEN CONTAINMENT VAULT
+      </button>
+    </aside>
+    <aside id="break-room-notification" class="sticky-note" hidden>
+      <p>You have a message in the break room.</p>
+    </aside>
+    <div id="blue-confirm-blackout" class="blue-confirm-blackout" hidden></div>
+    <footer aria-hidden="true">
+      TRIANGLE AGENCY PERSONNEL SOLUTIONS © 1993–PRESENT // YOUR COOPERATION HAS
+      BEEN NOTED
+    </footer>
+    <script src="/socket.io/socket.io.js"></script>
+    <script type="module" src="/app.js"></script>
+  </body>
+</html>

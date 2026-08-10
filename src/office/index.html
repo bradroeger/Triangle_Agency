@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Triangle Agency Office Portal</title>
+    <link rel="stylesheet" href="/office-assets/styles.css" />
+  </head>
+  <body>
+    <header>
+      <button
+        id="debug-reveal"
+        class="mark"
+        type="button"
+        aria-label="Reveal debug controls"
+      >
+        ▲
+      </button>
+      <div><strong>TRIANGLE AGENCY</strong><span>OFFICE PORTAL</span></div>
+    </header>
+    <main>
+      <div class="debug-toggle-row">
+        <button id="office-audio" type="button" aria-pressed="true">
+          DISABLE AUDIO
+        </button>
+        <button id="debug-toggle" type="button" aria-pressed="false" hidden>
+          ENABLE DEBUG MODE
+        </button>
+      </div>
+      <section id="debug-panel" class="debug-panel" hidden>
+        <div>
+          <strong>SIMULATED OFFICE READER</strong
+          ><span>No physical NFC activity is generated.</span>
+        </div>
+        <label for="debug-uid">FAKE BADGE UID</label>
+        <input id="debug-uid" value="04A7812C966180" autocomplete="off" />
+        <button id="debug-present" type="button">PRESENT CARD</button>
+        <button id="debug-remove" type="button">REMOVE CARD</button>
+      </section>
+      <p id="waiting" class="waiting">PRESENT EMPLOYEE IDENTIFICATION</p>
+      <section id="record" hidden aria-live="polite">
+        <dl>
+          <div>
+            <dt>Employee Name:</dt>
+            <dd id="name"></dd>
+          </div>
+          <div>
+            <dt>Employee Number:</dt>
+            <dd id="number"></dd>
+          </div>
+          <div>
+            <dt>Role:</dt>
+            <dd id="role"></dd>
+          </div>
+          <div>
+            <dt>Anomaly Designation:</dt>
+            <dd id="anomaly"></dd>
+          </div>
+          <div>
+            <dt>Clearance Level:</dt>
+            <dd id="clearance"></dd>
+          </div>
+          <div>
+            <dt>Department:</dt>
+            <dd id="department"></dd>
+          </div>
+          <div>
+            <dt>Demerits:</dt>
+            <dd id="demerits"></dd>
+          </div>
+          <div>
+            <dt>Commendations:</dt>
+            <dd id="commendations"></dd>
+          </div>
+        </dl>
+        <section id="unresolved-files" class="unresolved-files" hidden>
+          <div>
+            <strong>OUTSTANDING READING ASSIGNMENT</strong>
+            <span id="unresolved-files-count"></span>
+          </div>
+          <p id="unresolved-files-list"></p>
+          <small
+            >Access assigned material through Personnel Records and any
+            additional routes made available to you.</small
+          >
+        </section>
+        <section id="anomalous-files" class="anomalous-files" hidden>
+          <span>THIS WINDOW IS NOT PART OF AGENCYOS</span>
+          <strong id="anomalous-files-count"></strong>
+          <p id="anomalous-files-list"></p>
+          <small>do not look for these // they are already looking back</small>
+        </section>
+        <aside>
+          <span>MESSAGE FROM MANAGEMENT</span>
+          <div class="management-message">
+            <img
+              id="gm-eye"
+              src="/content-assets/office-eye"
+              alt="Entity eye"
+              hidden
+            />
+            <p id="gm-message"></p>
+          </div>
+        </aside>
+      </section>
+      <section id="unknown" class="unknown" hidden>
+        UNREGISTERED EMPLOYEE CREDENTIAL
+      </section>
+    </main>
+    <section id="personal-message" class="personal-message" hidden>
+      <p id="personal-message-text"></p>
+    </section>
+    <section
+      id="crash-overlay"
+      class="crash-overlay"
+      hidden
+      aria-live="assertive"
+    >
+      <div id="error-storm" class="error-storm"></div>
+      <div class="intrusion-banner">INTRUSION // INTRUSION // INTRUSION</div>
+      <canvas id="static-tear" class="static-tear" aria-hidden="true"></canvas>
+      <canvas
+        id="crash-eye"
+        width="1000"
+        height="560"
+        role="img"
+        aria-label="An eye formed from blue ones and zeroes watches through the broken terminal."
+      ></canvas>
+      <p id="eye-warning" class="eye-warning"></p>
+      <div class="crash-code">
+        ERR::REALITY_BOUNDARY_FAILURE<br />TA_OS PANIC 0x0000EYE<br />EMPLOYEE
+        PRESENCE DUPLICATED
+      </div>
+    </section>
+    <section id="blackout" class="blackout" hidden>
+      <canvas
+        class="crt-ghost-eye"
+        width="1000"
+        height="560"
+        aria-hidden="true"
+      ></canvas>
+      <div class="blackout-presence" aria-hidden="true">
+        <img class="presence-image" alt="" />
+      </div>
+      <canvas id="matrix-rain" class="matrix-rain" aria-hidden="true"></canvas>
+      <span id="reboot-text"></span>
+      <div id="recovery-terminals" class="recovery-terminals"></div>
+    </section>
+    <footer>YOUR PRODUCTIVITY IS A SHARED RESPONSIBILITY™</footer>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/office-assets/app.js"></script>
+  </body>
+</html>

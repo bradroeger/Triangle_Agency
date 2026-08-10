@@ -1,0 +1,363 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Triangle Agency Supervisor Controls</title>
+    <link rel="stylesheet" href="/supervisor-assets/styles.css" />
+  </head>
+  <body>
+    <header>
+      <span>TRIANGLE AGENCY</span>
+      <h1>SUPERVISOR CONTROLS</h1>
+      <button id="new-employee-open" class="header-action" type="button">
+        ADD NEW EMPLOYEE
+      </button>
+      <a href="/">RETURN TO TERMINAL</a>
+    </header>
+    <dialog id="new-employee-dialog" class="employee-dialog">
+      <form id="new-employee-form">
+        <div class="dialog-heading">
+          <div>
+            <span>HUMAN RESOURCES // FORM TA-003</span>
+            <h2>NEW EMPLOYEE INTAKE</h2>
+          </div>
+          <button id="new-employee-close" type="button">CLOSE</button>
+        </div>
+        <p>
+          Creates a local employee record and generates its badge, personnel,
+          and payroll numbers. Required fields are marked with an asterisk.
+        </p>
+
+        <fieldset>
+          <legend>IDENTITY AND BADGE</legend>
+          <div class="employee-form-grid">
+            <label>BADGE UID<output>GENERATED WHEN SAVED</output></label>
+            <label
+              >EMPLOYEE NUMBER<output id="employee-number-preview"
+                >TA1115</output
+              ></label
+            >
+            <label>EMPLOYEE NAME *<input name="name" required /></label>
+            <label>PRONOUNS<input name="pronouns" /></label>
+            <label>BIRTHDAY<input name="birthday" type="date" /></label
+            ><label>NEXT OF KIN<input name="nextOfKin" /></label>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>ORDINARY EMPLOYMENT INFORMATION</legend>
+          <div class="employee-form-grid">
+            <label>DEPARTMENT *<input name="department" required /></label>
+            <label
+              >ROLE<input name="role" placeholder="Defaults to competency"
+            /></label>
+            <label
+              >MANAGER<select name="manager">
+                <option>Mr. Germain</option>
+              </select></label
+            >
+            <label>HIRE DATE<input name="hireDate" type="date" /></label>
+            <label
+              >EMPLOYMENT TYPE<select name="employmentType">
+                <option value="">NOT RECORDED</option>
+                <option>FULL TIME</option>
+                <option>PART TIME</option>
+                <option>CONTRACT</option>
+                <option>TEMPORARY</option>
+                <option>INTERN</option>
+              </select></label
+            >
+            <label>WORK LOCATION<input name="workLocation" /></label>
+            <label>PHONE EXTENSION<input name="phoneExtension" /></label>
+            <label>PAYROLL NUMBER<output>GENERATED WHEN SAVED</output></label>
+            <label
+              >STATUS *<select name="status" required>
+                <option>ACTIVE</option>
+                <option>PROBATION</option>
+                <option>SUSPENDED</option>
+                <option>TERMINATED</option>
+                <option>MISSING</option>
+              </select></label
+            >
+            <label
+              >CLEARANCE LEVEL *<input
+                name="clearance"
+                type="number"
+                min="0"
+                max="9"
+                value="0"
+                required
+            /></label>
+            <label
+              >DEMERITS<input name="demerits" type="number" min="0" value="0"
+            /></label>
+            <label
+              >COMMENDATIONS<input
+                name="commendations"
+                type="number"
+                min="0"
+                value="0"
+            /></label>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>TRIANGLE CLASSIFICATION</legend>
+          <div class="employee-form-grid">
+            <label
+              >ANOMALY DESIGNATION<input
+                name="anomalyDesignation"
+                value="NONE ASSIGNED"
+            /></label>
+            <label
+              >ANOMALY TYPE<select name="anomalyType" required>
+                <option>Whisper</option>
+                <option>Catalogue</option>
+                <option>Drain</option>
+                <option>Timepiece</option>
+                <option>Growth</option>
+                <option>Gun</option>
+                <option>Dream</option>
+                <option>Manifold</option>
+                <option>Absence</option>
+              </select></label
+            >
+            <label
+              >COMPETENCY TYPE<select name="competencyType" required>
+                <option>PR</option>
+                <option>R&amp;D</option>
+                <option>Barista</option>
+                <option>CEO</option>
+                <option>Intern</option>
+                <option>Gravedigger</option>
+                <option>Reception</option>
+                <option>Hotline</option>
+                <option>Clown</option>
+              </select></label
+            >
+            <label
+              >REALITY TYPE<select name="realityType" required>
+                <option>Caretaker</option>
+                <option>Overbooked</option>
+                <option>Pursued</option>
+                <option>Star</option>
+                <option>Struggling</option>
+                <option>Newborn</option>
+                <option>Romantic</option>
+                <option>Backbone</option>
+                <option>Creature</option>
+              </select></label
+            >
+            <label
+              >ANOMALY DANGER (1–9)<input
+                name="anomalyDanger"
+                type="number"
+                min="1"
+                max="9"
+                value="1"
+                required
+            /></label>
+            <label
+              >COMPANY LOYALTY (1–9)<input
+                name="loyalty"
+                type="number"
+                min="1"
+                max="9"
+                value="5"
+                required
+            /></label>
+            <label>ENTITY / NON-HUMAN TYPE<input name="entityType" /></label>
+            <label>DEPENDANT<input name="dependant" /></label>
+          </div>
+          <div class="employee-check-grid">
+            <label><input name="nonHuman" type="checkbox" /> NON-HUMAN</label>
+            <label
+              ><input name="anomalousEmployee" type="checkbox" /> ANOMALOUS
+              EMPLOYEE</label
+            >
+            <label
+              ><input name="realityCompromised" type="checkbox" /> REALITY
+              COMPROMISED</label
+            >
+            <label
+              ><input name="containmentRequired" type="checkbox" /> CONTAINMENT
+              REQUIRED</label
+            >
+          </div>
+          <label class="wide-field"
+            >PERSONNEL NOTES<textarea
+              name="personnelNotes"
+              maxlength="1000"
+              rows="4"
+            ></textarea>
+          </label>
+        </fieldset>
+
+        <p id="new-employee-result" class="inline-result" role="status"></p>
+        <div class="dialog-actions">
+          <button type="submit">CREATE EMPLOYEE AND ASSIGN BADGE</button>
+          <button id="new-employee-cancel" type="button">CANCEL</button>
+        </div>
+      </form>
+    </dialog>
+    <main>
+      <p class="warning">
+        LOCAL PHYSICAL-CONTROL INTERFACE // NOT AUTHENTICATED
+      </p>
+      <section>
+        <h2>CURRENT EFFECTIVE RECORDS</h2>
+        <pre id="current-records">No active interaction.</pre>
+      </section>
+      <section class="playwall-manager">
+        <div class="playwall-heading">
+          <div>
+            <span>PERSONNEL RECORDS</span>
+            <h2>PLAYWALL DOCUMENT ACCESS</h2>
+          </div>
+          <strong>PLAYWALL // RED + BLUE + YELLOW</strong>
+        </div>
+        <p>
+          Choose an employee and assign the documents they may open after
+          Personnel Records (Red), the hidden Containment Vault (Blue), or a
+          personal Break Room message (Yellow) becomes available.
+        </p>
+        <div class="playwall-controls">
+          <label
+            >EMPLOYEE<select id="playwall-employee">
+              <option value="">— SELECT EMPLOYEE —</option>
+            </select></label
+          >
+          <label
+            >AVAILABLE DOCUMENT<select id="playwall-document">
+              <option value="">— SELECT DOCUMENT —</option>
+            </select></label
+          >
+          <button id="playwall-grant">ADD DOCUMENT</button>
+        </div>
+        <div class="assigned-heading">
+          <h3>DOCUMENTS ALLOWED FOR THIS EMPLOYEE</h3>
+          <span id="playwall-count"></span>
+        </div>
+        <div id="playwall-assigned" class="playwall-assigned"></div>
+        <p id="playwall-result" class="inline-result" role="status"></p>
+      </section>
+      <section class="reminder-manager">
+        <div class="playwall-heading">
+          <div>
+            <span>EMPLOYEE SERVICES</span>
+            <h2>SPOKEN REMINDERS</h2>
+          </div>
+          <strong>OFFICE PORTAL // LOCAL</strong>
+        </div>
+        <p>
+          Reminders are read aloud after the employee badges into the Office
+          Portal. Keep entries brief and suitable for speech.
+        </p>
+        <div class="reminder-controls">
+          <label
+            >EMPLOYEE<select id="reminder-employee">
+              <option value="">— SELECT EMPLOYEE —</option>
+            </select></label
+          >
+          <label
+            >NEW REMINDER<input
+              id="reminder-text"
+              maxlength="240"
+              placeholder="Submit Form TA-17 before 16:00."
+          /></label>
+          <button id="reminder-add">ADD REMINDER</button>
+        </div>
+        <div class="assigned-heading">
+          <h3>ACTIVE REMINDERS</h3>
+          <span id="reminder-count"></span>
+        </div>
+        <div id="reminder-list" class="reminder-list"></div>
+        <p id="reminder-result" class="inline-result" role="status"></p>
+      </section>
+      <section>
+        <h2>CAMPAIGN STATE</h2>
+        <div class="columns">
+          <div>
+            <h3>FLAGS</h3>
+            <pre id="flags"></pre>
+          </div>
+          <div>
+            <h3>UNLOCKED CONTENT</h3>
+            <ul id="content"></ul>
+          </div>
+          <div>
+            <h3>TRIGGER HISTORY</h3>
+            <pre id="history"></pre>
+          </div>
+        </div>
+      </section>
+      <section>
+        <h2>STATE CHANGE REQUEST</h2>
+        <div class="form-grid">
+          <label
+            >ACTION<select id="action">
+              <option>SET_FLAG</option>
+              <option>SET_EMPLOYEE_CLEARANCE</option>
+              <option>SET_EMPLOYEE_STATUS</option>
+              <option>SET_EMPLOYEE_LOYALTY</option>
+              <option>ADD_EMPLOYEE_PERMISSION</option>
+              <option>REMOVE_EMPLOYEE_PERMISSION</option>
+              <option>SET_RESOURCE_ENABLED</option>
+              <option>SET_RESOURCE_CLEARANCE</option>
+              <option>UNLOCK_CONTENT</option>
+            </select></label
+          >
+          <label
+            >EMPLOYEE ID<input id="employee-id" placeholder="TA-0417"
+          /></label>
+          <label
+            >RESOURCE<select id="resource-id">
+              <option value="">—</option>
+            </select></label
+          >
+          <label
+            >CONTENT<select id="content-id">
+              <option value="">—</option>
+            </select></label
+          >
+          <label>FLAG<input id="flag" placeholder="campaign-flag" /></label>
+          <label
+            >VALUE<input id="value" placeholder="true, 3, ACTIVE…"
+          /></label>
+          <label
+            >PERMISSION<select id="permission">
+              <option>allow</option>
+              <option>deny</option>
+            </select></label
+          >
+          <label
+            >CONFIRMATION<input id="confirmation" placeholder="CONFIRM"
+          /></label>
+        </div>
+        <button id="apply">APPLY CONFIRMED CHANGE</button>
+      </section>
+      <section>
+        <h2>CAMPAIGN OPERATIONS</h2>
+        <div class="operations">
+          <button id="select-resource">SELECT RESOURCE ABOVE</button
+          ><button id="trigger">TRIGGER SUPERVISOR EVENT</button
+          ><button id="export">EXPORT STATE</button
+          ><input id="reset-confirmation" placeholder="TYPE RESET" /><button
+            id="reset"
+            class="danger"
+          >
+            RESET RUNTIME STATE
+          </button>
+        </div>
+      </section>
+      <section id="effects" hidden>
+        <h2>SUPERVISOR CONTENT</h2>
+        <div id="effect-body"></div>
+      </section>
+      <p id="result" role="status"></p>
+    </main>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/supervisor-assets/app.js"></script>
+  </body>
+</html>

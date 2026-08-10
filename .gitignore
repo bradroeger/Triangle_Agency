@@ -1,0 +1,18 @@
+node_modules/
+.DS_Store
+npm-debug.log*
+.env
+coverage/
+
+# Copyrighted Triangle Agency source material and generated derivatives.
+# Owners can generate these locally; they must never be committed or published.
+data/pdf/
+data/assets/Playwall/
+data/playwall-content.json
+
+# Local campaign/runtime data.
+data/access-log.jsonl
+data/state.json
+data/campaign-events.jsonl
+backups/
+exports/

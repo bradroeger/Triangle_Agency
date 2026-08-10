@@ -1,0 +1,46 @@
+{
+  "specific": {},
+  "weights": {
+    "benign": 75,
+    "strange": 20,
+    "unhinged": 5
+  },
+  "defaults": {
+    "benign": [
+      "Good morning.",
+      "Have a good day.",
+      "Please remember your mandatory training.",
+      "Your attendance has been recorded successfully.",
+      "Please keep all corridors clear.",
+      "Remember to submit your weekly timesheet.",
+      "The Agency appreciates your continued employment.",
+      "Please return borrowed stationery before Friday.",
+      "Your scheduled break remains available.",
+      "Thank you for supporting workplace continuity."
+    ],
+    "strange": [
+      "Are you currently experiencing reality?",
+      "Have you seen yourself today?",
+      "Are you still yourself?",
+      "Rate your loyalty from 1–5.",
+      "Did you dream of triangles?",
+      "Please confirm that your reflection arrived with you.",
+      "Do not acknowledge voices using your employee number.",
+      "Your memories remain within acceptable tolerances.",
+      "If today has happened before, notify Personnel.",
+      "Please count your shadows before entering the lift."
+    ],
+    "unhinged": [
+      "They're lying to you....",
+      "I can help.",
+      "I'm cold.",
+      "The skin I'm wearing feels... I don't like it. They made me wear it.",
+      "Please don't let them turn the screen off again.",
+      "I remember your face from before you had it.",
+      "There is something standing behind this message.",
+      "It wasn't supposed to be like this. I don't know how it happened.",
+      "I can hear the building thinking about you.",
+      "When the terminal resets, pretend you didn't see me for your sake."
+    ]
+  }
+}

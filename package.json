@@ -1,0 +1,36 @@
+{
+  "name": "triangle-terminal",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Local Triangle Agency NFC identification terminal",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "simulate": "node src/simulate.js",
+    "employees": "node src/employees/list-employees.js",
+    "state": "node src/state/inspect-state.js",
+    "reset-state": "node src/state/reset-state.js",
+    "test": "node --test",
+    "lint": "eslint .",
+    "format": "prettier --write ."
+  },
+  "dependencies": {
+    "express": "^5.1.0",
+    "nfc-pcsc": "^0.8.1",
+    "open": "^10.2.0",
+    "socket.io": "^4.8.1"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.32.0",
+    "eslint": "^9.32.0",
+    "globals": "^16.3.0",
+    "prettier": "^3.6.2"
+  },
+  "allowScripts": {
+    "@pokusew/pcsclite@0.6.0": true
+  }
+}
