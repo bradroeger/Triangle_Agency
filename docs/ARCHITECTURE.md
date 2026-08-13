@@ -19,16 +19,16 @@ flowchart LR
 
 ## Components
 
-| Area | Responsibility |
-| --- | --- |
-| `src/server.js` | Process composition, HTTP routes, Socket.IO events, NFC lifecycle, and browser launch. |
-| `src/nfc` | PC/SC reader isolation, UID normalization, badge-present/removal events, and simulator support. |
-| `src/application` | Coordinates a scan, access decision, state mutation, content unlocks, and effects. |
-| `src/access`, `src/triggers` | Evaluates resource access and declarative campaign rules; appends audit events. |
-| `src/*Registry.js` | Loads and validates JSON definitions at startup. |
-| `src/public`, `src/office`, `src/supervisor` | The three browser interfaces. |
-| `data/*.json` | Versioned definitions plus ignored mutable campaign state. |
-| `data/assets` | App-owned media and optional, ignored Playwall derivatives. |
+| Area                                         | Responsibility                                                                                  |
+| -------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| `src/server.js`                              | Process composition, HTTP routes, Socket.IO events, NFC lifecycle, and browser launch.          |
+| `src/nfc`                                    | PC/SC reader isolation, UID normalization, badge-present/removal events, and simulator support. |
+| `src/application`                            | Coordinates a scan, access decision, state mutation, content unlocks, and effects.              |
+| `src/access`, `src/triggers`                 | Evaluates resource access and declarative campaign rules; appends audit events.                 |
+| `src/*Registry.js`                           | Loads and validates JSON definitions at startup.                                                |
+| `src/public`, `src/office`, `src/supervisor` | The three browser interfaces.                                                                   |
+| `data/*.json`                                | Versioned definitions plus ignored mutable campaign state.                                      |
+| `data/assets`                                | App-owned media and optional, ignored Playwall derivatives.                                     |
 
 ## Request and state flow
 

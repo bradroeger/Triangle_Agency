@@ -2,14 +2,14 @@
 
 ## Minimum requirements
 
-| Component | Minimum | Notes |
-| --- | --- | --- |
-| Operating system | Windows 10/11 or a currently supported macOS release | Linux may work with PC/SC configured, but is not a tested target. |
-| Node.js | 22 or newer | The version requirement is enforced by `package.json`. Use a current Node.js LTS release when possible. |
-| Memory | 2 GB free | The app is small; media-heavy Playwall content needs additional disk space, not much additional RAM. |
-| Disk | 250 MB for source and dependencies, plus local media | The copyright-controlled PDF and generated assets can require substantially more space. |
-| Browser | Current Edge, Chrome, Firefox, or Safari | Audio playback requires a user interaction after page load. |
-| NFC (optional) | PC/SC-compatible reader and badges | An ACS ACR122U is the intended device. The built-in simulator works without hardware. |
+| Component        | Minimum                                              | Notes                                                                                                   |
+| ---------------- | ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| Operating system | Windows 10/11 or a currently supported macOS release | Linux may work with PC/SC configured, but is not a tested target.                                       |
+| Node.js          | 22 or newer                                          | The version requirement is enforced by `package.json`. Use a current Node.js LTS release when possible. |
+| Memory           | 2 GB free                                            | The app is small; media-heavy Playwall content needs additional disk space, not much additional RAM.    |
+| Disk             | 250 MB for source and dependencies, plus local media | The copyright-controlled PDF and generated assets can require substantially more space.                 |
+| Browser          | Current Edge, Chrome, Firefox, or Safari             | Audio playback requires a user interaction after page load.                                             |
+| NFC (optional)   | PC/SC-compatible reader and badges                   | An ACS ACR122U is the intended device. The built-in simulator works without hardware.                   |
 
 Physical NFC use also requires a working PC/SC service and a compatible reader driver. Native dependency compilation may require Python 3 and C++ build tools on Windows, or Xcode Command Line Tools on macOS.
 
@@ -51,9 +51,9 @@ This creates `data/assets/Playwall` and `data/playwall-content.json`. All of the
 
 ## Configuration
 
-| Variable | Default | Purpose |
-| --- | --- | --- |
-| `PORT` | `3000` | Local HTTP port. |
-| `NO_OPEN` | unset | Set to `1` to prevent automatic browser launch. |
+| Variable  | Default | Purpose                                         |
+| --------- | ------- | ----------------------------------------------- |
+| `PORT`    | `3000`  | Local HTTP port.                                |
+| `NO_OPEN` | unset   | Set to `1` to prevent automatic browser launch. |
 
 The server deliberately binds to `127.0.0.1`. See [DEPLOYMENT.md](DEPLOYMENT.md) before making it reachable from another device.

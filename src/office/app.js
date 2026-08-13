@@ -9,6 +9,9 @@ const debugUid = document.querySelector("#debug-uid");
 const debugPresent = document.querySelector("#debug-present");
 const debugRemove = document.querySelector("#debug-remove");
 const officeAudio = document.querySelector("#office-audio");
+const agencyClock = document.querySelector("#agency-clock");
+const agencyClockLabel = document.querySelector(".agency-clock-label");
+const agencyClockFooter = document.querySelector(".agency-clock-footer");
 const crashOverlay = document.querySelector("#crash-overlay");
 const crashEye = document.querySelector("#crash-eye");
 const errorStorm = document.querySelector("#error-storm");
@@ -52,7 +55,11 @@ for (const eventName of ["pointerdown", "keydown"]) {
   window.addEventListener(eventName, activateDefaultAudio, { once: true });
 }
 
+updateAgencyClock();
+setInterval(updateAgencyClock, 1000);
+
 debugReveal.addEventListener("click", () => {
+  officeAudio.hidden = false;
   debugToggle.hidden = false;
   debugToggle.focus();
 });
@@ -232,6 +239,45 @@ function reset() {
   hidePersonalMessage();
   showUnresolvedFiles([]);
   waiting.textContent = "PRESENT EMPLOYEE IDENTIFICATION";
+}
+
+function updateAgencyClock() {
+  const anomaly = document.body.classList.contains("anomaly-signal");
+  agencyClockLabel.textContent = anomaly
+    ? "YOUR TIME IS NOT THEIRS"
+    : "AGENCY STANDARD TIME";
+  agencyClockFooter.textContent = anomaly
+    ? "YOU ARE MORE THAN YOUR OUTPUT"
+    : "PUNCTUALITY IS CONTINUITY";
+  const now = new Date();
+  const parts = anomaly
+    ? ["HE", "LP"]
+    : [now.getHours(), now.getMinutes(), now.getSeconds()].map((part) =>
+        String(part).padStart(2, "0"),
+      );
+  agencyClock.dateTime = anomaly ? "" : now.toISOString();
+  agencyClock.setAttribute("aria-label", parts.join(anomaly ? "" : ":"));
+  agencyClock.replaceChildren();
+  parts.forEach((part, index) => {
+    for (const character of part) {
+      const digit = document.createElement("span");
+      digit.className = character === "3" ? "clock-digit three" : "clock-digit";
+      digit.dataset.value = character;
+      digit.setAttribute("aria-hidden", "true");
+      for (const name of ["a", "b", "c", "d", "e", "f", "g"]) {
+        const segment = document.createElement("i");
+        segment.className = `segment segment-${name}`;
+        digit.append(segment);
+      }
+      agencyClock.append(digit);
+    }
+    if (!anomaly && index < parts.length - 1) {
+      const separator = document.createElement("span");
+      separator.className = "clock-separator";
+      separator.setAttribute("aria-hidden", "true");
+      agencyClock.append(separator);
+    }
+  });
 }
 
 function showUnresolvedFiles(files = [], dependant = activeDependant) {
@@ -480,6 +526,8 @@ function startAnomalySequence() {
   cancelSpeech();
   selectPresenceImage();
   document.body.classList.add("anomaly-signal");
+  agencyClock.closest(".agency-clock").classList.add("anomaly");
+  updateAgencyClock();
   playAsset("static", 0.3, playStaticFallback, { loop: true });
   buildErrorStorm();
   anomalyTimers.push(
@@ -609,6 +657,8 @@ function cancelAnomalySequence() {
   anomalyTimers = [];
   document.body.classList.remove("terminal-impact");
   document.body.classList.remove("anomaly-signal");
+  agencyClock.closest(".agency-clock").classList.remove("anomaly");
+  updateAgencyClock();
   crashOverlay.hidden = true;
   crashOverlay.className = "crash-overlay";
   blackout.hidden = true;

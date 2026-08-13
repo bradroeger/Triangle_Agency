@@ -20,7 +20,7 @@
     </header>
     <main>
       <div class="debug-toggle-row">
-        <button id="office-audio" type="button" aria-pressed="true">
+        <button id="office-audio" type="button" aria-pressed="true" hidden>
           DISABLE AUDIO
         </button>
         <button id="debug-toggle" type="button" aria-pressed="false" hidden>
@@ -105,6 +105,11 @@
       </section>
       <section id="unknown" class="unknown" hidden>
         UNREGISTERED EMPLOYEE CREDENTIAL
+      </section>
+      <section class="agency-clock" aria-label="Triangle Agency office time">
+        <span class="agency-clock-label">AGENCY STANDARD TIME</span>
+        <time id="agency-clock" datetime=""></time>
+        <span class="agency-clock-footer">PUNCTUALITY IS CONTINUITY</span>
       </section>
     </main>
     <section id="personal-message" class="personal-message" hidden>

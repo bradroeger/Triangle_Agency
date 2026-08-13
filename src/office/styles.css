@@ -209,6 +209,246 @@ button.enabled {
   background: #fff9eb;
   white-space: nowrap;
 }
+.agency-clock {
+  box-sizing: border-box;
+  width: 100%;
+  margin: 1.25rem 0 0;
+  padding: 0.55rem 0.8rem 0.45rem;
+  color: #312722;
+  background: #e7dac6;
+  border: 5px solid #17110f;
+  box-shadow: 10px 10px 0 var(--red);
+  font-family: "Courier New", monospace;
+  text-align: center;
+}
+.agency-clock-label,
+.agency-clock-footer {
+  display: block;
+  color: #5d5047;
+  font:
+    700 0.56rem Arial,
+    sans-serif;
+  letter-spacing: 0.18em;
+}
+.agency-clock time {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2rem;
+  margin: 0.2rem 0 0.12rem;
+  padding: 0.55rem 0.65rem;
+  background: #541311;
+  border: 3px inset #9c6a5b;
+  box-shadow: inset 0 0 18px rgb(20 0 0 / 45%);
+}
+.clock-digit {
+  --segment-on: #fff0dc;
+  --segment-off: rgb(255 179 153 / 14%);
+  position: relative;
+  display: inline-block;
+  width: clamp(25px, 4vw, 36px);
+  height: clamp(44px, 7vw, 62px);
+  filter: drop-shadow(0 0 4px var(--segment-on));
+}
+.clock-digit.three {
+  --segment-on: #ef1111;
+  --segment-off: rgb(109 0 0 / 24%);
+}
+.segment {
+  position: absolute;
+  display: block;
+  background: var(--segment-off);
+}
+.segment-a,
+.segment-d,
+.segment-g {
+  left: 16%;
+  width: 68%;
+  height: 11%;
+  clip-path: polygon(10% 0, 90% 0, 100% 50%, 90% 100%, 10% 100%, 0 50%);
+}
+.segment-a {
+  top: 2%;
+}
+.segment-g {
+  top: 44.5%;
+}
+.segment-d {
+  bottom: 2%;
+}
+.segment-b,
+.segment-c,
+.segment-e,
+.segment-f {
+  width: 16%;
+  height: 39%;
+  clip-path: polygon(50% 0, 100% 12%, 100% 88%, 50% 100%, 0 88%, 0 12%);
+}
+.segment-b {
+  top: 8%;
+  right: 1%;
+}
+.segment-c {
+  right: 1%;
+  bottom: 8%;
+}
+.segment-e {
+  bottom: 8%;
+  left: 1%;
+}
+.segment-f {
+  top: 8%;
+  left: 1%;
+}
+.clock-digit[data-value="0"]
+  :is(.segment-a, .segment-b, .segment-c, .segment-d, .segment-e, .segment-f),
+.clock-digit[data-value="1"] :is(.segment-b, .segment-c),
+.clock-digit[data-value="2"]
+  :is(.segment-a, .segment-b, .segment-d, .segment-e, .segment-g),
+.clock-digit[data-value="3"]
+  :is(.segment-a, .segment-b, .segment-c, .segment-d, .segment-g),
+.clock-digit[data-value="4"]
+  :is(.segment-b, .segment-c, .segment-f, .segment-g),
+.clock-digit[data-value="5"]
+  :is(.segment-a, .segment-c, .segment-d, .segment-f, .segment-g),
+.clock-digit[data-value="6"]
+  :is(.segment-a, .segment-c, .segment-d, .segment-e, .segment-f, .segment-g),
+.clock-digit[data-value="7"] :is(.segment-a, .segment-b, .segment-c),
+.clock-digit[data-value="8"] .segment,
+.clock-digit[data-value="9"]
+  :is(.segment-a, .segment-b, .segment-c, .segment-d, .segment-f, .segment-g) {
+  background: var(--segment-on);
+}
+.clock-digit[data-value="H"]
+  :is(.segment-b, .segment-c, .segment-e, .segment-f, .segment-g),
+.clock-digit[data-value="E"]
+  :is(.segment-a, .segment-d, .segment-e, .segment-f, .segment-g),
+.clock-digit[data-value="L"] :is(.segment-d, .segment-e, .segment-f),
+.clock-digit[data-value="P"]
+  :is(.segment-a, .segment-b, .segment-e, .segment-f, .segment-g) {
+  background: var(--segment-on);
+}
+.clock-separator {
+  position: relative;
+  display: inline-block;
+  width: 7px;
+  height: clamp(44px, 7vw, 62px);
+  animation: clock-blink 1s steps(1, end) infinite;
+}
+.clock-separator::before,
+.clock-separator::after {
+  content: "";
+  position: absolute;
+  left: 1px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #fff0dc;
+  box-shadow: 0 0 5px rgb(255 240 220 / 70%);
+}
+.clock-separator::before {
+  top: 28%;
+}
+.clock-separator::after {
+  bottom: 28%;
+}
+.agency-clock.anomaly {
+  position: relative;
+  z-index: 1002;
+  overflow: hidden;
+  border-color: #168cff;
+  background: #c8e5f7;
+  box-shadow:
+    0 0 25px rgb(22 140 255 / 70%),
+    10px 10px 0 #071a35;
+  animation: entity-clock-glitch 430ms steps(2, end) infinite;
+}
+.agency-clock.anomaly time {
+  background: #071a35;
+  border-color: #168cff;
+}
+.agency-clock.anomaly::before,
+.agency-clock.anomaly::after {
+  content: "";
+  position: absolute;
+  inset-inline: -8%;
+  z-index: 4;
+  height: 5px;
+  pointer-events: none;
+  background: #8bd2ff;
+  opacity: 0.65;
+  mix-blend-mode: screen;
+}
+.agency-clock.anomaly::before {
+  top: 31%;
+  animation: entity-clock-scan 760ms steps(4, end) infinite reverse;
+}
+.agency-clock.anomaly::after {
+  top: 68%;
+  animation: entity-clock-scan 510ms steps(3, end) infinite;
+}
+.agency-clock.anomaly .clock-digit {
+  --segment-on: #168cff;
+  --segment-off: rgb(22 140 255 / 18%);
+}
+.agency-clock.anomaly .clock-separator::before,
+.agency-clock.anomaly .clock-separator::after {
+  background: #168cff;
+  box-shadow: 0 0 8px #168cff;
+}
+.agency-clock.anomaly time,
+.agency-clock.anomaly .agency-clock-label,
+.agency-clock.anomaly .agency-clock-footer {
+  color: #41aaff;
+  text-shadow: 0 0 9px #168cff;
+}
+@keyframes clock-blink {
+  0%,
+  49% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes entity-clock-glitch {
+  0%,
+  72%,
+  100% {
+    transform: translate(0);
+    filter: none;
+    clip-path: inset(0);
+  }
+  74% {
+    transform: translate(-7px, 2px) skewX(2deg);
+    filter: contrast(1.8) brightness(1.2);
+    clip-path: inset(7% 0 18% 0);
+  }
+  80% {
+    transform: translate(9px, -1px) skewX(-3deg);
+    filter: contrast(2.2) brightness(0.7);
+    clip-path: inset(24% 0 3% 0);
+  }
+  86% {
+    transform: translate(-3px, 1px);
+    filter: hue-rotate(16deg) brightness(1.4);
+    clip-path: inset(0);
+  }
+}
+@keyframes entity-clock-scan {
+  0% {
+    transform: translateX(-18%) skewX(-18deg);
+    opacity: 0;
+  }
+  35% {
+    opacity: 0.72;
+  }
+  100% {
+    transform: translateX(18%) skewX(18deg);
+    opacity: 0;
+  }
+}
 .waiting,
 .unknown {
   padding: 3rem 1rem;
