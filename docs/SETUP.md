@@ -56,4 +56,4 @@ This creates `data/assets/Playwall` and `data/playwall-content.json`. All of the
 | `PORT`    | `3000`  | Local HTTP port.                                |
 | `NO_OPEN` | unset   | Set to `1` to prevent automatic browser launch. |
 
-The server deliberately binds to `127.0.0.1`. See [DEPLOYMENT.md](DEPLOYMENT.md) before making it reachable from another device.
+The server listens on the PC's network interfaces to support employee phone portals. Use only a trusted private network, and see [DEPLOYMENT.md](DEPLOYMENT.md) before allowing another device to connect.

@@ -14,5 +14,6 @@ data/playwall-content.json
 data/access-log.jsonl
 data/state.json
 data/campaign-events.jsonl
+data/device-access-log.jsonl
 backups/
 exports/

@@ -66,16 +66,26 @@ test("persists flags, overrides, unlocked content, and trigger history atomicall
     await store.incrementFlag("count", 2);
     await store.applyEmployeeOverride("TA-1", {
       clearance: 4,
+      demerits: 2,
+      approvedDeviceId: "12345678-1234-1234-1234-123456789abc",
+      approvedDeviceLabel: "Approved phone",
       playwallDocuments: ["playwall-agency-a1"],
       seenPlaywallDocuments: ["playwall-agency-a1"],
       reminders: ["Complete mandatory corridor awareness training."],
     });
     await store.applyResourceOverride("archive", { enabled: false });
+    await store.setMissionMvp("TA-1", true);
+    await store.setMissionMvp("TA-2", true);
     await store.unlockContent("notice");
     await store.recordTrigger("first-event");
     const reloaded = await StateStore.load(area.file);
     assert.equal(reloaded.getFlag("count"), 3);
     assert.equal(reloaded.getEmployeeOverride("TA-1").clearance, 4);
+    assert.equal(reloaded.getEmployeeOverride("TA-1").demerits, 2);
+    assert.equal(
+      reloaded.getEmployeeOverride("TA-1").approvedDeviceLabel,
+      "Approved phone",
+    );
     assert.deepEqual(reloaded.getEmployeeOverride("TA-1").playwallDocuments, [
       "playwall-agency-a1",
     ]);
@@ -86,6 +96,8 @@ test("persists flags, overrides, unlocked content, and trigger history atomicall
     assert.deepEqual(reloaded.getEmployeeOverride("TA-1").reminders, [
       "Complete mandatory corridor awareness training.",
     ]);
+    assert.equal(reloaded.getEmployeeOverride("TA-1").missionMvp, undefined);
+    assert.equal(reloaded.getEmployeeOverride("TA-2").missionMvp, true);
     assert.equal(reloaded.getResourceOverride("archive").enabled, false);
     assert.equal(reloaded.isContentUnlocked("notice"), true);
     assert.equal(reloaded.wasTriggerExecuted("first-event"), true);

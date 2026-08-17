@@ -89,7 +89,7 @@ set PORT=3001
 npm start
 ```
 
-The server binds only to `127.0.0.1`. It needs local access only: do not configure router port forwarding or expose it publicly. If Windows Defender Firewall asks, public-network access is not needed.
+The server listens on the PC's network interfaces so optional employee phone portals can work. Use it only on a trusted private network, allow Private-network access in Windows Defender Firewall only when phones need access, and never configure router port forwarding or expose it publicly.
 
 For an optional standalone-looking Edge window, start the server and then run:
 
@@ -328,7 +328,7 @@ Open `http://127.0.0.1:3000/supervisor`. This secondary local page can inspect e
 
 State-changing operations require `CONFIRM`. Reset requires the exact text `RESET`, creates a timestamped backup first, and resets runtime state only. If backup creation fails, reset stops and keeps the original state. Static registries are untouched.
 
-Exports are written without overwrite to `exports/triangle-state-<timestamp>.json`. Reset backups go to `backups/state-<timestamp>.json`. Both directories are ignored by Git. Supervisor controls have no password: they are protected only by localhost binding and physical control of the Surface.
+Exports are written without overwrite to `exports/triangle-state-<timestamp>.json`. Reset backups go to `backups/state-<timestamp>.json`. Both directories are ignored by Git. Supervisor controls have no password. When LAN access is enabled for player phones, keep the Supervisor URL private and use only a trusted private network.
 
 The equivalent CLI reset is interactive:
 
@@ -379,6 +379,20 @@ Restart the application after editing this file. Empty messages or malformed JSO
 The office portal also has an **ENABLE DEBUG MODE** control. It uses the same local simulator as the main terminal: enter a fake UID, choose **PRESENT CARD**, then **REMOVE CARD** to exercise the normal reset. Debug scans use the real employee and GM-message lookup path and are marked simulated in the application logs.
 
 Use `04A7812C966180` to test Pendleton’s specific message. Use `A1B2C3D4` to test the weighted fallback pools; Mercer intentionally has no specific message entry.
+
+## Agent phone portals
+
+Every employee has a dedicated address in the form `http://<PC-address>:3000/agent/<employee-number>`. The Supervisor page's **Agent Phone Portal Access** section provides an employee dropdown and a **COPY URL** button using the first available private-network address detected on the PC.
+
+The page is locked by default. A recognized badge scan records that employee as present and immediately unlocks their page. Scanning the same badge again records their departure and locks it. The Supervisor can select the employee and use **FORCE LOGOUT** at any time. Presence is held only in memory, so restarting the application safely locks every employee portal.
+
+An unlocked portal shows only that employee's assigned Red, Yellow, and Blue Playwall material. File images use a guarded employee-specific route, so logging out also blocks copied image addresses. Opening a document marks it read using the same Playwall state as the Office portal. Under the established Blue-file behavior, a Blue item removes itself after it is opened.
+
+Each browser creates a random local device identifier and reports it only while the employee portal is unlocked. The Supervisor page shows the latest observed device, local network address, and approval state. Select **APPROVE RECENT DEVICE** to establish the expected browser for that employee. Before approval, access is logged but never penalized. After approval, a different browser identifier adds one demerit per employee login session and writes a local audit entry to `data/device-access-log.jsonl` containing the timestamp, employee number, device label and identifier, browser user-agent, local IP address, match result, and whether a demerit was added.
+
+This is a theatrical compliance check, not reliable hardware identification. Browser storage is scoped to the exact site address; clearing browser data, switching browsers, private browsing, or accessing the portal through a different PC address can create a new identifier. Review the observed details before approving a replacement. The application does not send device information outside the local server.
+
+For phones, connect the Surface and phones to the same trusted private Wi-Fi, start the application, and use the URL shown by the Supervisor page. If Windows Defender Firewall asks whether Node.js can accept connections, allow **Private networks** only. Do not allow Public networks, configure router port forwarding, or publish these URLs on the internet. The phone URL will not work if client isolation is enabled on the Wi-Fi network.
 
 ### Recovering damaged state
 
@@ -467,11 +481,11 @@ This is expected on non-ACR122 readers and may occur on different ACR122U firmwa
 
 ### Windows Defender Firewall prompt
 
-The application listens only on localhost and does not need LAN or public network access. Cancel or deny public-network access; no router changes are required.
+The local Office and Supervisor pages do not require firewall access. Agent phone portals require LAN access, so allow Node.js on **Private networks** only when using that feature. Deny Public-network access. Router port forwarding is never required.
 
 ## Known limitations and MVP success
 
-Employee matching, state changes, and resource decisions are local theatrical effects, not authentication. Badge UIDs may be cloned, JSON files and state are editable by the local user, supervisor controls are unauthenticated, and there is no tamper protection. Player-private content is only visually private on a shared screen. There is no database, live definition reload, NFC writing, printing, Foundry integration, or remote access. Multiple readers are tracked independently, but the interface displays the most recent badge globally. CLI-simulated badges do not automatically emit removal events; browser test mode provides an explicit removal control.
+Employee matching, state changes, and resource decisions are local theatrical effects, not strong authentication. Badge UIDs may be cloned, employee portal URLs may be forwarded, JSON files and state are editable by the local user, supervisor controls are unauthenticated, and there is no tamper protection or encrypted HTTPS. Use only a trusted private LAN. There is no database, live definition reload, NFC writing, printing, Foundry integration, or internet-hosted remote access. Multiple readers are tracked independently, but the Office interface displays the most recent badge globally. CLI-simulated badges do not automatically emit removal events; browser test mode provides an explicit removal control.
 
 Completed access attempts are appended to `data/access-log.jsonl`. Each line contains the timestamp, UID, employee ID when known, resource ID, result, reason code, and simulation flag. Names and complete employee records are not logged. The file is excluded from Git, is never loaded into memory, and can be deleted while the application is stopped if the local prop history is no longer needed. Scans made without a selected resource are not access attempts and are not written there.
 

@@ -10,6 +10,10 @@ export function mergeEmployee(staticEmployee, override = {}) {
     ...(override.clearance !== undefined && { clearance: override.clearance }),
     ...(override.status !== undefined && { status: override.status }),
     ...(override.loyalty !== undefined && { loyalty: override.loyalty }),
+    ...(override.missionMvp !== undefined && {
+      missionMvp: override.missionMvp,
+    }),
+    ...(override.demerits !== undefined && { demerits: override.demerits }),
     permissions: {
       allow: [...(overridePermissions?.allow ?? staticPermissions.allow)],
       deny: [...(overridePermissions?.deny ?? staticPermissions.deny)],

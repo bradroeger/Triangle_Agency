@@ -24,6 +24,7 @@ export default [
       "src/public/**/*.js",
       "src/supervisor/**/*.js",
       "src/office/**/*.js",
+      "src/agent/**/*.js",
     ],
     languageOptions: {
       globals: {

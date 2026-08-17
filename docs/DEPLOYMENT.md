@@ -2,7 +2,7 @@
 
 ## Recommended model
 
-Run the Node.js app on the computer physically connected to the NFC reader and keep it bound to `127.0.0.1`. If a remote GM needs access, place an authenticated private-network or identity-aware reverse proxy in front of it.
+Run the Node.js app on the computer physically connected to the NFC reader. It listens on local network interfaces so employee phones can reach their gated portals. Permit access only on a trusted Private network and never expose the port directly to the internet. If a remote GM needs access, place an authenticated private-network or identity-aware reverse proxy in front of it.
 
 Do not expose port 3000 directly, configure router port forwarding, or deploy this unchanged as a public website. The supervisor UI can edit campaign data and has no application-level authentication. Ordinary serverless/static hosts are also a poor fit: the app needs a long-running Node.js process, WebSockets, writable persistent storage, and—for physical scanning—local PC/SC hardware.
 
@@ -24,12 +24,12 @@ Choose a private overlay network or a tunnel/reverse proxy that provides all of 
 - authenticated access before requests reach the Node process;
 - HTTPS/TLS;
 - WebSocket support for Socket.IO;
-- a route to the local origin `http://127.0.0.1:3000`;
+- a route to the application origin on port `3000`;
 - access restricted to the GM/operator accounts.
 
 Keep the player and office displays local. After configuring the private access product, verify `/supervisor`, live Socket.IO updates, and a state mutation from an authorized remote device. Then verify the URL is unavailable when signed out and to an unapproved account.
 
-Because the app remains on localhost, most tunnel agents can connect to it without changing source code. If a conventional reverse proxy runs on the same host, proxy to `127.0.0.1:3000`; do not change the app to listen on every interface unless the host firewall and proxy boundary are deliberately configured.
+If a conventional reverse proxy runs on the same host, proxy to `127.0.0.1:3000`. Restrict port `3000` with the host firewall and do not add router port forwarding.
 
 ## Hosted server (no physical NFC)
 

@@ -5,7 +5,7 @@ try {
   const uid = normalizeUid(process.argv[2]);
   const resourceId = process.argv[3];
   const port = process.env.PORT || "3000";
-  const response = await fetch(`http://127.0.0.1:${port}/__simulate`, {
+  const response = await fetch(`http://0.0.0.0:${port}/__simulate`, {
     method: "POST",
     headers: { "content-type": "application/json" },
     body: JSON.stringify({ uid, ...(resourceId && { resourceId }) }),

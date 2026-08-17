@@ -95,6 +95,20 @@ export class StateStore {
     });
   }
 
+  async setMissionMvp(employeeId, enabled) {
+    return this.mutate((draft) => {
+      for (const override of Object.values(draft.employees)) {
+        delete override.missionMvp;
+      }
+      if (enabled) {
+        draft.employees[employeeId] = {
+          ...(draft.employees[employeeId] ?? {}),
+          missionMvp: true,
+        };
+      }
+    });
+  }
+
   async applyResourceOverride(resourceId, override) {
     return this.mutate((draft) => {
       draft.resources[resourceId] = {
@@ -235,6 +249,32 @@ function validateState(state) {
       throw new Error(
         `Campaign state field "employees.${employeeId}.status" must be a non-empty string.`,
       );
+    }
+    if (
+      override.missionMvp !== undefined &&
+      typeof override.missionMvp !== "boolean"
+    ) {
+      throw new Error(
+        `Campaign state field "employees.${employeeId}.missionMvp" must be boolean.`,
+      );
+    }
+    if (
+      override.demerits !== undefined &&
+      (!Number.isInteger(override.demerits) || override.demerits < 0)
+    ) {
+      throw new Error(
+        `Campaign state field "employees.${employeeId}.demerits" must be a non-negative integer.`,
+      );
+    }
+    for (const field of ["approvedDeviceId", "approvedDeviceLabel"]) {
+      if (
+        override[field] !== undefined &&
+        (typeof override[field] !== "string" || !override[field].trim())
+      ) {
+        throw new Error(
+          `Campaign state field "employees.${employeeId}.${field}" must be a non-empty string.`,
+        );
+      }
     }
     if (override.permissions !== undefined) {
       requireObject(

@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Triangle Agency Employee Portal</title>
+    <link rel="stylesheet" href="/agent-assets/styles.css" />
+  </head>
+  <body>
+    <header>
+      <span class="triangle" aria-hidden="true"></span>
+      <div><strong>TRIANGLE AGENCY</strong><small>EMPLOYEE PORTAL</small></div>
+    </header>
+    <main>
+      <section id="locked" class="locked" aria-live="polite">
+        <p>REMOTE RECORD ACCESS LOCKED</p>
+        <h1>PRESENT IDENTIFICATION AT THE AGENCY TERMINAL</h1>
+        <small
+          >This page will unlock automatically after badge verification.</small
+        >
+      </section>
+      <section id="portal" hidden>
+        <div class="identity">
+          <span>VERIFIED EMPLOYEE</span>
+          <div id="mission-mvp-banner" class="mission-mvp-banner" hidden>
+            MISSION MVP // EXEMPLARY TEMPORARY VALUE
+          </div>
+          <h1 id="employee-name"></h1>
+          <p>
+            <b id="employee-number"></b> //
+            <span id="employee-department"></span>
+          </p>
+          <div class="employment-metrics">
+            <div>
+              <span>DEMERITS</span><strong id="employee-demerits">0</strong>
+            </div>
+            <div>
+              <span>COMMENDATIONS</span
+              ><strong id="employee-commendations">0</strong>
+            </div>
+            <div><span>STATUS</span><strong id="employee-status"></strong></div>
+          </div>
+        </div>
+        <aside id="probation-warning" class="probation-warning" hidden>
+          <strong>FORMAL PROBATION NOTICE</strong>
+          <p>
+            Your continued employment is under active review. Further demerits,
+            procedural deviation, or insufficient enthusiasm may result in
+            corrective reassignment.
+          </p>
+        </aside>
+        <p class="notice">AUTHORIZED MATERIAL REMAINS COMPANY PROPERTY</p>
+        <nav class="portal-tabs" aria-label="Employee portal sections">
+          <button class="active" data-tab="files" type="button">
+            AVAILABLE FILES
+          </button>
+          <button data-tab="record" type="button">EMPLOYEE RECORD</button>
+        </nav>
+        <section id="files-panel" class="tab-panel">
+          <div id="file-groups"></div>
+        </section>
+        <section id="record-panel" class="tab-panel employee-record" hidden>
+          <div class="record-heading">
+            <span>HUMAN RESOURCES // ACTIVE FILE</span>
+            <h2>EMPLOYEE RECORD</h2>
+          </div>
+          <dl id="employee-record-fields"></dl>
+        </section>
+      </section>
+      <section
+        id="viewer"
+        class="viewer"
+        hidden
+        aria-modal="true"
+        role="dialog"
+      >
+        <div class="viewer-heading">
+          <div>
+            <span id="viewer-classification"></span>
+            <h2 id="viewer-title"></h2>
+          </div>
+          <button id="viewer-close" type="button">CLOSE FILE</button>
+        </div>
+        <div id="viewer-body"></div>
+      </section>
+    </main>
+    <footer>ACCESS IS CONDITIONAL // DISCRETION IS MANDATORY</footer>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/agent-assets/app.js"></script>
+  </body>
+</html>

@@ -1,4 +1,5 @@
 import http from "node:http";
+import { networkInterfaces } from "node:os";
 import { access } from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
@@ -82,7 +83,7 @@ try {
   process.exit(1);
 }
 
-const host = "127.0.0.1";
+const host = "0.0.0.0";
 const port = parsePort(process.env.PORT);
 const app = express();
 const httpServer = http.createServer(app);
@@ -93,6 +94,9 @@ const accessLogger = new AccessLogger(
 );
 const campaignLogger = new CampaignEventLogger(
   new URL("../data/campaign-events.jsonl", import.meta.url),
+);
+const deviceAccessLogger = new CampaignEventLogger(
+  new URL("../data/device-access-log.jsonl", import.meta.url),
 );
 const terminalApplication = new TerminalApplication({
   employeeRegistry,
@@ -107,6 +111,9 @@ const terminalApplication = new TerminalApplication({
   onWarning: (error) => console.warn(error.message),
 });
 const readers = new Map();
+const activeAgents = new Map();
+const recentAgentDevices = new Map();
+const penalizedDeviceSessions = new Set();
 let currentBadge = null;
 let activeResourceId = null;
 let displayRevision = 0;
@@ -129,6 +136,14 @@ app.get("/office", (_request, response) => {
     fileURLToPath(new URL("./office/index.html", import.meta.url)),
   );
 });
+app.get("/agent/:employeeId", (request, response) => {
+  if (!terminalApplication.getEffectiveEmployeeById(request.params.employeeId))
+    return response.status(404).send("Employee portal not found.");
+  response.set("Cache-Control", "no-store");
+  return response.sendFile(
+    fileURLToPath(new URL("./agent/index.html", import.meta.url)),
+  );
+});
 app.use(
   "/supervisor-assets",
   express.static(fileURLToPath(new URL("./supervisor", import.meta.url))),
@@ -136,6 +151,16 @@ app.use(
 app.use(
   "/office-assets",
   express.static(fileURLToPath(new URL("./office", import.meta.url))),
+);
+app.use(
+  "/agent-assets",
+  express.static(fileURLToPath(new URL("./agent", import.meta.url)), {
+    etag: false,
+    maxAge: 0,
+    setHeaders(response) {
+      response.setHeader("Cache-Control", "no-store, max-age=0");
+    },
+  }),
 );
 app.use(
   "/office-media",
@@ -152,6 +177,115 @@ app.get("/content-assets/:contentId", (request, response) => {
   if (!asset) return response.status(404).send("Content asset not found.");
   response.type(asset.mimeType);
   return response.sendFile(path.resolve(asset.filePath));
+});
+
+app.get("/api/agent/:employeeId", (request, response) => {
+  response.set("Cache-Control", "no-store, max-age=0");
+  const employeeId = request.params.employeeId;
+  if (!terminalApplication.getEffectiveEmployeeById(employeeId))
+    return response
+      .status(404)
+      .json({ ok: false, error: "Employee portal not found." });
+  if (!activeAgents.has(employeeId))
+    return response.json({ ok: true, unlocked: false });
+  return response.json(agentPortalSnapshot(employeeId));
+});
+
+app.get("/api/agent/:employeeId/content/:contentId", (request, response) => {
+  const { employeeId, contentId } = request.params;
+  if (
+    !activeAgents.has(employeeId) ||
+    !employeeHasContent(employeeId, contentId)
+  )
+    return response.status(403).send("This file is locked.");
+  const asset = terminalApplication.getContentAsset(contentId, employeeId);
+  if (!asset) return response.status(404).send("File asset not found.");
+  response.type(asset.mimeType);
+  return response.sendFile(path.resolve(asset.filePath));
+});
+
+app.post("/api/agent/:employeeId/viewed", async (request, response) => {
+  const employeeId = request.params.employeeId;
+  const contentId = request.body?.contentId;
+  if (
+    !activeAgents.has(employeeId) ||
+    !employeeHasContent(employeeId, contentId)
+  )
+    return response
+      .status(403)
+      .json({ ok: false, error: "This file is locked." });
+  try {
+    await terminalApplication.markEmployeePlaywallSeen(employeeId, contentId);
+    broadcastAgentPortal(employeeId);
+    broadcastSupervisorState();
+    return response.json({ ok: true });
+  } catch (error) {
+    return response.status(400).json({ ok: false, error: error.message });
+  }
+});
+
+app.post("/api/agent/:employeeId/device", async (request, response) => {
+  const employeeId = request.params.employeeId;
+  const session = activeAgents.get(employeeId);
+  if (!terminalApplication.getEffectiveEmployeeById(employeeId))
+    return response
+      .status(404)
+      .json({ ok: false, error: "Employee portal not found." });
+  const deviceId = request.body?.deviceId;
+  if (typeof deviceId !== "string" || !/^[a-zA-Z0-9-]{16,128}$/.test(deviceId))
+    return response
+      .status(400)
+      .json({ ok: false, error: "Invalid device identifier." });
+  const userAgent = String(
+    request.get("user-agent") ?? "Unknown browser",
+  ).slice(0, 300);
+  const suppliedLabel = String(request.body?.label ?? "Browser device")
+    .trim()
+    .slice(0, 100);
+  const observed = {
+    deviceId,
+    label: suppliedLabel || "Browser device",
+    userAgent,
+    ip: request.ip,
+    observedAt: new Date().toISOString(),
+  };
+  recentAgentDevices.set(employeeId, observed);
+  const policy = terminalApplication.getEmployeeDevicePolicy(employeeId);
+  const approved = policy.approvedDeviceId === deviceId;
+  const incorrect = Boolean(session && policy.approvedDeviceId && !approved);
+  const penaltyKey = session
+    ? `${employeeId}:${session.loggedInAt}:${deviceId}`
+    : null;
+  let demeritAdded = false;
+  if (incorrect && !penalizedDeviceSessions.has(penaltyKey)) {
+    penalizedDeviceSessions.add(penaltyKey);
+    await terminalApplication.addEmployeeDemerit(employeeId);
+    demeritAdded = true;
+  }
+  await deviceAccessLogger
+    .append({
+      event: "AGENT_PORTAL_DEVICE_ACCESS",
+      employeeId,
+      ...observed,
+      approved,
+      incorrect,
+      demeritAdded,
+      portalUnlocked: Boolean(session),
+    })
+    .catch((error) => console.warn(error.message));
+  broadcastAgentPortal(employeeId);
+  broadcastSupervisorState();
+  return response.json({
+    ok: true,
+    status: !session
+      ? "LOCKED_VISIT"
+      : approved
+        ? "APPROVED"
+        : incorrect
+          ? "INCORRECT"
+          : "PENDING_APPROVAL",
+    demeritAdded,
+  });
 });
 
 app.get("/api/personnel-records", (_request, response) => {
@@ -348,6 +482,44 @@ app.post("/api/supervisor/employees", async (request, response) => {
   }
 });
 
+app.post("/api/supervisor/agent-logout", (request, response) => {
+  if (request.body?.confirmation !== "CONFIRM")
+    return response
+      .status(400)
+      .json({ ok: false, error: "Confirmation required." });
+  const employeeId = request.body?.employeeId;
+  if (!terminalApplication.getEffectiveEmployeeById(employeeId))
+    return response.status(404).json({ ok: false, error: "Unknown employee." });
+  lockAgentPortal(employeeId, "SUPERVISOR");
+  return response.json({ ok: true });
+});
+
+app.post("/api/supervisor/approve-agent-device", async (request, response) => {
+  if (request.body?.confirmation !== "CONFIRM")
+    return response
+      .status(400)
+      .json({ ok: false, error: "Confirmation required." });
+  const employeeId = request.body?.employeeId;
+  const observed = recentAgentDevices.get(employeeId);
+  if (!observed)
+    return response.status(400).json({
+      ok: false,
+      error: "No device has been observed for this employee.",
+    });
+  try {
+    await terminalApplication.approveEmployeeDevice(
+      employeeId,
+      observed.deviceId,
+      observed.label,
+    );
+    broadcastSupervisorState();
+    broadcastAgentPortal(employeeId);
+    return response.json({ ok: true });
+  } catch (error) {
+    return response.status(400).json({ ok: false, error: error.message });
+  }
+});
+
 app.post("/api/supervisor/mutate", async (request, response) => {
   if (request.body?.confirmation !== "CONFIRM") {
     return response
@@ -358,6 +530,15 @@ app.post("/api/supervisor/mutate", async (request, response) => {
     await terminalApplication.supervisorMutation(request.body.command ?? {});
     broadcastState();
     broadcastSupervisorState();
+    if (request.body.command?.type === "SET_EMPLOYEE_MISSION_MVP") {
+      for (const employeeId of activeAgents.keys())
+        broadcastAgentPortal(employeeId);
+    } else {
+      const affectedEmployeeId = request.body.command?.employeeId;
+      if (affectedEmployeeId && activeAgents.has(affectedEmployeeId)) {
+        broadcastAgentPortal(affectedEmployeeId);
+      }
+    }
     if (request.body.command?.type?.includes("PLAYWALL_DOCUMENT")) {
       io.emit("playwall-access-updated");
       const command = request.body.command;
@@ -518,6 +699,15 @@ io.on("connection", (socket) => {
       ? terminalApplication.getEffectiveResource(activeResourceId)
       : null,
   });
+  socket.on("agent-subscribe", (employeeId) => {
+    if (
+      typeof employeeId !== "string" ||
+      !terminalApplication.getEffectiveEmployeeById(employeeId)
+    )
+      return;
+    socket.join(`agent:${employeeId}`);
+    socket.emit("agent-portal-state", agentPortalSnapshot(employeeId));
+  });
 });
 
 io.of("/supervisor").on("connection", (socket) => {
@@ -557,7 +747,12 @@ async function handleBadgeScanned({ readerId, uid, simulated }) {
     console.log("Badge input ignored while anomaly recovery is in progress.");
     return;
   }
-  if (uid === heldBadgeUid && Date.now() < badgeHoldUntil) {
+  const knownEmployee = terminalApplication.getEffectiveEmployeeByUid(uid);
+  if (
+    uid === heldBadgeUid &&
+    Date.now() < badgeHoldUntil &&
+    !activeAgents.has(knownEmployee?.employeeId)
+  ) {
     return;
   }
   heldBadgeUid = null;
@@ -577,6 +772,13 @@ async function handleBadgeScanned({ readerId, uid, simulated }) {
   };
   console.log(`${simulated ? "[SIMULATED] " : ""}Badge scanned: ${uid}`);
   io.emit("badge-scanned", badge);
+  if (knownEmployee && activeAgents.has(knownEmployee.employeeId)) {
+    lockAgentPortal(knownEmployee.employeeId, "BADGE");
+    currentBadge = { ...badge, readerId, employee: knownEmployee };
+    io.emit("office-agent-logout", { employee: knownEmployee });
+    io.emit("display-reset");
+    return;
+  }
   const result = await terminalApplication.processScan({
     ...badge,
     resourceId: activeResourceId,
@@ -590,6 +792,7 @@ async function handleBadgeScanned({ readerId, uid, simulated }) {
     interaction: result,
   };
   if (result.employee) {
+    unlockAgentPortal(result.employee.employeeId);
     const unresolvedFiles = listUnresolvedPlaywallFiles(
       result.employee.employeeId,
     );
@@ -802,9 +1005,86 @@ function broadcastState() {
 }
 
 function supervisorSnapshot() {
-  return terminalApplication.getSupervisorState(
+  const snapshot = terminalApplication.getSupervisorState(
     currentBadge?.employee?.employeeId ?? null,
     activeResourceId,
+  );
+  return {
+    ...snapshot,
+    agentAccess: snapshot.employees.map((employee) => ({
+      employeeId: employee.employeeId,
+      unlocked: activeAgents.has(employee.employeeId),
+      loggedInAt: activeAgents.get(employee.employeeId)?.loggedInAt ?? null,
+      path: `/agent/${encodeURIComponent(employee.employeeId)}`,
+    })),
+    agentPortalOrigins: localNetworkOrigins(),
+    deviceAccess: snapshot.employees.map((employee) => ({
+      employeeId: employee.employeeId,
+      ...terminalApplication.getEmployeeDevicePolicy(employee.employeeId),
+      observed: recentAgentDevices.get(employee.employeeId) ?? null,
+    })),
+  };
+}
+
+function localNetworkOrigins() {
+  return Object.values(networkInterfaces())
+    .flat()
+    .filter((address) => address?.family === "IPv4" && !address.internal)
+    .map((address) => `http://${address.address}:${port}`);
+}
+
+function agentPortalSnapshot(employeeId) {
+  if (!activeAgents.has(employeeId)) return { ok: true, unlocked: false };
+  const employee = terminalApplication.getEffectiveEmployeeById(employeeId);
+  const files = terminalApplication
+    .listEmployeePlaywallContent(employeeId)
+    .map((content) => ({
+      ...content,
+      category: content.id.includes("-anomaly-")
+        ? "blue"
+        : content.id.includes("-reality-")
+          ? "yellow"
+          : "red",
+      ...(content.assetUrl && {
+        assetUrl: `/api/agent/${encodeURIComponent(employeeId)}/content/${encodeURIComponent(content.id)}`,
+      }),
+    }));
+  return {
+    ok: true,
+    unlocked: true,
+    loggedInAt: activeAgents.get(employeeId).loggedInAt,
+    employee,
+    files,
+  };
+}
+
+function employeeHasContent(employeeId, contentId) {
+  return (
+    typeof contentId === "string" &&
+    terminalApplication
+      .listEmployeePlaywallContent(employeeId)
+      .some((content) => content.id === contentId)
+  );
+}
+
+function unlockAgentPortal(employeeId) {
+  activeAgents.set(employeeId, { loggedInAt: new Date().toISOString() });
+  console.log(`Agent portal unlocked: ${employeeId}`);
+  broadcastAgentPortal(employeeId);
+  broadcastSupervisorState();
+}
+
+function lockAgentPortal(employeeId, source) {
+  activeAgents.delete(employeeId);
+  console.log(`Agent portal locked: ${employeeId} (${source})`);
+  broadcastAgentPortal(employeeId);
+  broadcastSupervisorState();
+}
+
+function broadcastAgentPortal(employeeId) {
+  io.to(`agent:${employeeId}`).emit(
+    "agent-portal-state",
+    agentPortalSnapshot(employeeId),
   );
 }
 

@@ -29,6 +29,97 @@ header {
   background: var(--red);
   box-shadow: none;
 }
+.agent-access-manager {
+  border-left: 10px solid var(--red);
+}
+.employment-manager {
+  border-left: 10px solid #17110f;
+}
+.employment-controls {
+  display: grid;
+  grid-template-columns: minmax(190px, 1.3fr) minmax(180px, 1fr) repeat(4, auto);
+  align-items: end;
+  gap: 0.7rem;
+}
+.employment-controls label,
+.employment-current {
+  display: grid;
+  gap: 0.3rem;
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+}
+.employment-current strong {
+  padding: 0.72rem;
+  color: white;
+  background: #17110f;
+}
+.employment-current strong.mvp {
+  color: #17110f;
+  background: #f1c83c;
+  box-shadow: 3px 3px 0 var(--red);
+}
+.agent-access-controls {
+  display: grid;
+  grid-template-columns:
+    minmax(180px, 1fr) auto minmax(170px, 1fr) minmax(260px, 2fr)
+    auto auto;
+  align-items: end;
+  gap: 0.8rem;
+}
+.agent-access-controls label,
+.agent-access-controls div {
+  display: grid;
+  gap: 0.3rem;
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+}
+#agent-access-status {
+  padding: 0.72rem;
+  color: white;
+  background: #17110f;
+}
+#agent-access-status.unlocked {
+  background: #146c36;
+}
+.device-review {
+  display: grid;
+  grid-template-columns: 1fr 1.5fr minmax(130px, 0.7fr) auto;
+  align-items: end;
+  gap: 0.7rem;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 2px dashed #8a7869;
+}
+.device-review div {
+  display: grid;
+  gap: 0.3rem;
+}
+.device-review span {
+  font-size: 0.62rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+}
+.device-review strong {
+  min-height: 2.5rem;
+  padding: 0.65rem;
+  background: #fff9eb;
+  border: 2px solid #17110f;
+  font:
+    700 0.7rem "Courier New",
+    monospace;
+  overflow-wrap: anywhere;
+}
+@media (max-width: 850px) {
+  .agent-access-controls,
+  .employment-controls {
+    grid-template-columns: 1fr;
+  }
+  .device-review {
+    grid-template-columns: 1fr;
+  }
+}
 .employee-dialog {
   width: min(1050px, 94vw);
   max-height: 92vh;

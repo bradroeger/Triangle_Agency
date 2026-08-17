@@ -24,10 +24,14 @@ test("merges employee clearance, status, and permission overrides", () => {
   const effective = mergeEmployee(employee, {
     clearance: 4,
     status: "PROBATION",
+    missionMvp: true,
+    demerits: 4,
     permissions: { allow: ["lift"], deny: [] },
   });
   assert.equal(effective.clearance, 4);
   assert.equal(effective.status, "PROBATION");
+  assert.equal(effective.missionMvp, true);
+  assert.equal(effective.demerits, 4);
   assert.deepEqual(effective.permissions, { allow: ["lift"], deny: [] });
 });
 

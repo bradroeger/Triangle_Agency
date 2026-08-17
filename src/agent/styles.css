@@ -1,0 +1,438 @@
+:root {
+  font-family: Arial, sans-serif;
+  color: #17110f;
+  background: #efe5d2;
+  --red: #e11b22;
+  --blue: #176bb3;
+  --yellow: #e5b92f;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  min-height: 100vh;
+  margin: 0;
+  background:
+    repeating-linear-gradient(
+      0deg,
+      rgb(67 48 37 / 3%) 0 1px,
+      transparent 1px 4px
+    ),
+    #efe5d2;
+}
+header {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 0.9rem 5vw;
+  color: white;
+  background: #17110f;
+  border-bottom: 8px solid var(--red);
+}
+.triangle {
+  width: 38px;
+  height: 34px;
+  background: var(--red);
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
+}
+header strong,
+header small {
+  display: block;
+  letter-spacing: 0.14em;
+}
+header small {
+  margin-top: 0.18rem;
+  color: #cfc2b2;
+  font-size: 0.6rem;
+}
+main {
+  width: min(760px, 92vw);
+  margin: 1.4rem auto 5rem;
+}
+.locked,
+.identity {
+  padding: clamp(1.4rem, 6vw, 3rem);
+  background: #fff9eb;
+  border: 5px solid #17110f;
+  box-shadow: 9px 9px 0 var(--red);
+}
+.locked {
+  margin-top: 12vh;
+  text-align: center;
+}
+.locked p,
+.identity > span {
+  color: var(--red);
+  font-weight: 900;
+  letter-spacing: 0.13em;
+}
+.locked h1 {
+  font-size: clamp(1.5rem, 7vw, 3rem);
+}
+.locked small {
+  font-family: "Courier New", monospace;
+}
+.identity h1 {
+  margin: 0.4rem 0;
+  font-size: clamp(1.8rem, 8vw, 3.6rem);
+}
+.mission-mvp-banner {
+  float: right;
+  max-width: 250px;
+  padding: 0.55rem 0.7rem;
+  color: #17110f;
+  background: #f1c83c;
+  border: 3px solid #17110f;
+  box-shadow: 4px 4px 0 var(--red);
+  font-size: 0.65rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  transform: rotate(1deg);
+}
+.identity p {
+  margin-bottom: 0;
+  font-family: "Courier New", monospace;
+}
+.employment-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.6rem;
+  margin-top: 1.2rem;
+}
+.employment-metrics div {
+  padding: 0.65rem;
+  color: white;
+  background: #17110f;
+}
+.employment-metrics span,
+.employment-metrics strong {
+  display: block;
+}
+.employment-metrics span {
+  color: #cfbfb0;
+  font-size: 0.55rem;
+  letter-spacing: 0.1em;
+}
+.employment-metrics strong {
+  margin-top: 0.25rem;
+  font:
+    900 1rem "Courier New",
+    monospace;
+}
+.probation-warning {
+  margin: 1.3rem 0;
+  padding: 1rem;
+  color: #17110f;
+  background: #f1c83c;
+  border: 5px double #17110f;
+  box-shadow: 7px 7px 0 var(--red);
+}
+.probation-warning strong {
+  color: #a00000;
+  letter-spacing: 0.08em;
+}
+.portal-tabs {
+  display: flex;
+  gap: 0.35rem;
+  margin-top: 1.4rem;
+  border-bottom: 5px solid #17110f;
+}
+.portal-tabs button {
+  padding: 0.75rem 0.9rem;
+  color: #17110f;
+  background: #d7c8b3;
+  border: 3px solid #17110f;
+  border-bottom: 0;
+  font-weight: 900;
+}
+.portal-tabs button.active {
+  color: white;
+  background: var(--red);
+}
+.employee-record {
+  background: #fff9eb;
+  border: 5px solid #17110f;
+  box-shadow: 8px 8px 0 var(--red);
+}
+.record-heading {
+  padding: 1rem;
+  color: white;
+  background: #17110f;
+  border-bottom: 8px solid var(--red);
+}
+.record-heading span {
+  font:
+    700 0.58rem "Courier New",
+    monospace;
+}
+.record-heading h2 {
+  margin: 0.25rem 0 0;
+}
+#employee-record-fields {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  margin: 0;
+}
+#employee-record-fields div {
+  padding: 0.8rem;
+  border-right: 1px solid #8e8275;
+  border-bottom: 1px solid #8e8275;
+}
+#employee-record-fields dt {
+  color: #7f1417;
+  font-size: 0.62rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+#employee-record-fields dd {
+  margin: 0.3rem 0 0;
+  font-family: "Courier New", monospace;
+  overflow-wrap: anywhere;
+}
+.notice {
+  margin: 1.5rem 0;
+  padding: 0.7rem;
+  color: white;
+  background: #17110f;
+  text-align: center;
+  font-size: 0.7rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+}
+.file-group {
+  margin: 1.5rem 0;
+  border: 4px solid #17110f;
+  background: #fff9eb;
+  box-shadow: 7px 7px 0 #17110f;
+}
+.group-heading {
+  padding: 0.8rem 1rem;
+  color: white;
+  background: var(--red);
+}
+.group-heading span {
+  font-size: 0.58rem;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+}
+.group-heading h2 {
+  margin: 0.2rem 0 0;
+  font-size: 1.15rem;
+}
+.file-group.yellow .group-heading {
+  color: #17110f;
+  background: var(--yellow);
+}
+.file-group.yellow {
+  width: min(88%, 440px);
+  aspect-ratio: 1;
+  margin: 2rem 0 2rem auto;
+  overflow: auto;
+  background: #f4dc54;
+  border: 0;
+  box-shadow: 5px 9px 13px rgb(48 38 16 / 35%);
+  transform: rotate(1.8deg);
+}
+.file-group.yellow .group-heading {
+  padding: 1.3rem 1.3rem 0.4rem;
+  background: transparent;
+}
+.file-group.yellow .group-heading span {
+  display: none;
+}
+.file-group.yellow .group-heading h2 {
+  font-family: "Segoe Print", "Bradley Hand", cursive;
+  font-size: 1.25rem;
+}
+.file-group.yellow .file-list {
+  padding: 0.5rem 1.3rem 1.3rem;
+}
+.file-group.yellow .file-list button {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  font-family: "Segoe Print", "Bradley Hand", cursive;
+  transform: rotate(-0.7deg);
+}
+.file-group.blue {
+  position: relative;
+  left: clamp(14px, 6vw, 64px);
+  width: calc(100% - clamp(20px, 8vw, 80px));
+  margin: 2.2rem 0 2.5rem;
+  opacity: 0.86;
+  background: #c0c0c0;
+  border: 3px outset #efefef;
+  box-shadow: 5px 5px 0 rgb(0 0 0 / 55%);
+  transform: translateX(2vw);
+  animation: vault-window-glitch 2.7s steps(1, end) infinite;
+}
+.file-group.blue .group-heading {
+  position: relative;
+  margin: 3px;
+  padding: 0.35rem 4.6rem 0.35rem 0.55rem;
+  background: linear-gradient(90deg, #000080, #1084d0);
+  font-family: "MS Sans Serif", Tahoma, sans-serif;
+}
+.file-group.blue .group-heading::before {
+  content: "◉";
+  margin-right: 0.4rem;
+  color: #83d2ff;
+}
+.file-group.blue .group-heading::after {
+  content: "_  □  ×";
+  position: absolute;
+  top: 0.3rem;
+  right: 0.35rem;
+  padding: 0.06rem 0.25rem;
+  color: #000;
+  background: #c0c0c0;
+  border: 2px outset white;
+  font-size: 0.72rem;
+}
+.file-group.blue .group-heading span {
+  display: none;
+}
+.file-group.blue .group-heading h2 {
+  display: inline;
+  font-size: 0.82rem;
+}
+.file-group.blue .file-list {
+  margin: 3px;
+  background: #e8e8e8;
+  border: 2px inset white;
+  font-family: "MS Sans Serif", Tahoma, sans-serif;
+}
+.file-group.blue .file-list button {
+  color: #000;
+  background: #c0c0c0;
+  border: 2px outset white;
+  box-shadow: none;
+}
+@keyframes vault-window-glitch {
+  0%,
+  88%,
+  100% {
+    transform: translateX(2vw);
+    filter: none;
+  }
+  89% {
+    transform: translateX(calc(2vw - 8px)) skewX(1deg);
+    filter: contrast(1.8) saturate(1.5);
+  }
+  91% {
+    transform: translateX(calc(2vw + 11px));
+    clip-path: inset(17% 0 8%);
+  }
+  94% {
+    transform: translateX(2vw);
+    clip-path: inset(0);
+    filter: hue-rotate(12deg);
+  }
+}
+.file-list {
+  display: grid;
+  gap: 0.65rem;
+  padding: 0.8rem;
+}
+.file-list button {
+  width: 100%;
+  padding: 0.85rem;
+  color: #17110f;
+  background: #fffdf6;
+  border: 2px solid #17110f;
+  text-align: left;
+  box-shadow: 3px 3px 0 #17110f;
+}
+.file-list button small,
+.file-list button strong {
+  display: block;
+}
+.file-list button small {
+  margin-bottom: 0.25rem;
+  color: #7f1417;
+  font-family: "Courier New", monospace;
+}
+.empty {
+  padding: 0.5rem;
+  font:
+    700 0.72rem "Courier New",
+    monospace;
+}
+.viewer {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  overflow: auto;
+  padding: 4vw;
+  background: #e9deca;
+}
+.viewer-heading {
+  position: sticky;
+  top: 0;
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.8rem;
+  color: white;
+  background: #17110f;
+  border-bottom: 7px solid var(--red);
+}
+.viewer-heading span {
+  font:
+    700 0.62rem "Courier New",
+    monospace;
+}
+.viewer-heading h2 {
+  margin: 0.2rem 0 0;
+  font-size: 1rem;
+}
+.viewer button {
+  align-self: center;
+  padding: 0.6rem;
+  color: white;
+  background: var(--red);
+  border: 2px solid white;
+  font-weight: 900;
+}
+#viewer-body {
+  width: min(900px, 100%);
+  margin: 1rem auto;
+}
+#viewer-body img {
+  display: block;
+  width: 100%;
+  height: auto;
+  background: white;
+  box-shadow: 7px 7px 0 #17110f;
+}
+#viewer-body p {
+  line-height: 1.55;
+}
+footer {
+  position: fixed;
+  inset: auto 0 0;
+  padding: 0.55rem;
+  color: white;
+  background: #17110f;
+  text-align: center;
+  font-size: 0.58rem;
+  letter-spacing: 0.12em;
+}
+@media (max-width: 520px) {
+  .employment-metrics,
+  #employee-record-fields {
+    grid-template-columns: 1fr;
+  }
+  .portal-tabs button {
+    flex: 1;
+    padding-inline: 0.35rem;
+    font-size: 0.68rem;
+  }
+  .viewer {
+    padding: 0;
+  }
+  .viewer-heading {
+    align-items: center;
+  }
+}

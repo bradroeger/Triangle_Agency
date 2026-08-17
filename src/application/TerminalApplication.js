@@ -197,6 +197,39 @@ export class TerminalApplication {
     ];
   }
 
+  getEmployeeDevicePolicy(employeeId) {
+    this.#requireEmployee(employeeId);
+    const override = this.#stateStore.getEmployeeOverride(employeeId);
+    return {
+      approvedDeviceId: override.approvedDeviceId ?? null,
+      approvedDeviceLabel: override.approvedDeviceLabel ?? null,
+    };
+  }
+
+  async approveEmployeeDevice(employeeId, deviceId, label) {
+    this.#requireEmployee(employeeId);
+    if (
+      typeof deviceId !== "string" ||
+      !/^[a-zA-Z0-9-]{16,128}$/.test(deviceId)
+    )
+      throw new Error("Device identifier is invalid.");
+    if (typeof label !== "string" || !label.trim())
+      throw new Error("Device label is required.");
+    await this.#stateStore.applyEmployeeOverride(employeeId, {
+      approvedDeviceId: deviceId,
+      approvedDeviceLabel: label.trim().slice(0, 160),
+    });
+  }
+
+  async addEmployeeDemerit(employeeId) {
+    const employee = this.getEffectiveEmployeeById(employeeId);
+    if (!employee) throw new Error(`Unknown employee: ${employeeId}`);
+    await this.#stateStore.applyEmployeeOverride(employeeId, {
+      demerits: employee.demerits + 1,
+    });
+    return employee.demerits + 1;
+  }
+
   async markEmployeePlaywallSeen(employeeId, contentId) {
     if (!this.#employeeCanAccessPlaywall(employeeId, contentId)) {
       throw new Error(
@@ -291,6 +324,11 @@ export class TerminalApplication {
       await this.#stateStore.applyEmployeeOverride(command.employeeId, {
         loyalty: command.loyalty,
       });
+    } else if (type === "SET_EMPLOYEE_MISSION_MVP") {
+      this.#requireEmployee(command.employeeId);
+      if (typeof command.enabled !== "boolean")
+        throw new Error("Mission MVP enabled value must be boolean.");
+      await this.#stateStore.setMissionMvp(command.employeeId, command.enabled);
     } else if (type === "ADD_EMPLOYEE_PERMISSION") {
       await this.#changePermission(command, true);
     } else if (type === "REMOVE_EMPLOYEE_PERMISSION") {
@@ -570,6 +608,7 @@ function publicEmployee(employee) {
     containmentRequired,
     anomalyDanger,
     loyalty,
+    missionMvp,
   } = employee;
   let employeeNumber = employeeId;
   if (competencyType && anomalyDanger && loyalty) {
@@ -620,6 +659,7 @@ function publicEmployee(employee) {
     containmentRequired,
     anomalyDanger,
     loyalty,
+    missionMvp: missionMvp ?? false,
     ...(message && { message }),
   };
 }

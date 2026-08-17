@@ -205,6 +205,70 @@
       <p class="warning">
         LOCAL PHYSICAL-CONTROL INTERFACE // NOT AUTHENTICATED
       </p>
+      <section class="agent-access-manager">
+        <h2>AGENT PHONE PORTAL ACCESS</h2>
+        <p>
+          Share the selected employee's URL. It remains locked until their badge
+          records entry and locks again when they badge out.
+        </p>
+        <div class="agent-access-controls">
+          <label
+            >EMPLOYEE<select id="agent-access-employee">
+              <option value="">â€” SELECT EMPLOYEE â€”</option>
+            </select></label
+          >
+          <div>
+            <span>STATUS</span><strong id="agent-access-status">LOCKED</strong>
+          </div>
+          <label>PHONE NETWORK<select id="agent-access-origin"></select></label>
+          <label>PRIVATE URL<input id="agent-access-url" readonly /></label>
+          <button id="agent-access-copy" type="button">COPY URL</button>
+          <button id="agent-force-logout" type="button">FORCE LOGOUT</button>
+        </div>
+        <div class="device-review">
+          <div>
+            <span>APPROVED DEVICE</span
+            ><strong id="approved-device">NONE APPROVED</strong>
+          </div>
+          <div>
+            <span>MOST RECENT DEVICE</span
+            ><strong id="observed-device">NONE OBSERVED</strong>
+          </div>
+          <div>
+            <span>NETWORK ADDRESS</span
+            ><strong id="observed-device-ip">â€”</strong>
+          </div>
+          <button id="approve-agent-device" type="button">
+            APPROVE RECENT DEVICE
+          </button>
+        </div>
+        <p id="agent-access-result" class="inline-result" role="status"></p>
+      </section>
+      <section class="employment-manager">
+        <h2>EMPLOYMENT STATUS &amp; MISSION RECOGNITION</h2>
+        <p>
+          Apply immediate Human Resources status changes or identify the current
+          Mission MVP.
+        </p>
+        <div class="employment-controls">
+          <label
+            >EMPLOYEE<select id="employment-employee">
+              <option value="">â€” SELECT EMPLOYEE â€”</option>
+            </select></label
+          >
+          <div class="employment-current">
+            <span>CURRENT RECORD</span>
+            <strong id="employment-current-status">SELECT EMPLOYEE</strong>
+          </div>
+          <button id="employment-probation" type="button">
+            PLACE ON PROBATION
+          </button>
+          <button id="employment-active" type="button">RETURN TO ACTIVE</button>
+          <button id="employment-mvp" type="button">NAME MISSION MVP</button>
+          <button id="employment-mvp-clear" type="button">CLEAR MVP</button>
+        </div>
+        <p id="employment-result" class="inline-result" role="status"></p>
+      </section>
       <section>
         <h2>CURRENT EFFECTIVE RECORDS</h2>
         <pre id="current-records">No active interaction.</pre>

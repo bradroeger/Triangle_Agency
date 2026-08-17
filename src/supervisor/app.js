@@ -28,6 +28,13 @@ const employeeNumberPreview = document.querySelector(
   "#employee-number-preview",
 );
 const newEmployeeResult = document.querySelector("#new-employee-result");
+const agentAccessEmployee = document.querySelector("#agent-access-employee");
+const agentAccessStatus = document.querySelector("#agent-access-status");
+const agentAccessUrl = document.querySelector("#agent-access-url");
+const agentAccessOrigin = document.querySelector("#agent-access-origin");
+const agentAccessResult = document.querySelector("#agent-access-result");
+const employmentEmployee = document.querySelector("#employment-employee");
+const employmentResult = document.querySelector("#employment-result");
 let latestState;
 installRedThreeTreatment();
 socket.on("supervisor-state", renderState);
@@ -57,6 +64,56 @@ document
   );
 playwallEmployee.addEventListener("change", renderAssignedPlaywall);
 reminderEmployee.addEventListener("change", renderReminders);
+agentAccessEmployee.addEventListener("change", renderAgentAccess);
+agentAccessOrigin.addEventListener("change", renderAgentAccess);
+employmentEmployee.addEventListener("change", renderEmploymentStatus);
+document
+  .querySelector("#employment-probation")
+  .addEventListener("click", () => void setEmploymentStatus("PROBATION"));
+document
+  .querySelector("#employment-active")
+  .addEventListener("click", () => void setEmploymentStatus("ACTIVE"));
+document
+  .querySelector("#employment-mvp")
+  .addEventListener("click", () => void setMissionMvp(true));
+document
+  .querySelector("#employment-mvp-clear")
+  .addEventListener("click", () => void setMissionMvp(false));
+document
+  .querySelector("#agent-access-copy")
+  .addEventListener("click", async () => {
+    if (!agentAccessUrl.value) return;
+    await navigator.clipboard.writeText(agentAccessUrl.value);
+    agentAccessResult.textContent = "PRIVATE URL COPIED.";
+  });
+document
+  .querySelector("#agent-force-logout")
+  .addEventListener("click", async () => {
+    if (!agentAccessEmployee.value) return;
+    try {
+      await request("/api/supervisor/agent-logout", {
+        employeeId: agentAccessEmployee.value,
+        confirmation: "CONFIRM",
+      });
+      agentAccessResult.textContent = "AGENT PORTAL LOCKED.";
+    } catch (error) {
+      agentAccessResult.textContent = `ERROR: ${error.message}`;
+    }
+  });
+document
+  .querySelector("#approve-agent-device")
+  .addEventListener("click", async () => {
+    if (!agentAccessEmployee.value) return;
+    try {
+      await request("/api/supervisor/approve-agent-device", {
+        employeeId: agentAccessEmployee.value,
+        confirmation: "CONFIRM",
+      });
+      agentAccessResult.textContent = "RECENT DEVICE APPROVED.";
+    } catch (error) {
+      agentAccessResult.textContent = `ERROR: ${error.message}`;
+    }
+  });
 document
   .querySelector("#reminder-add")
   .addEventListener(
@@ -139,6 +196,34 @@ function renderState(state) {
     "— SELECT EMPLOYEE —",
   );
   replaceOptions(
+    agentAccessEmployee,
+    state.employees.map((employee) => [
+      employee.employeeId,
+      `${employee.name} â€” ${employee.employeeNumber ?? employee.employeeId}`,
+    ]),
+    "â€” SELECT EMPLOYEE â€”",
+  );
+  replaceOptions(
+    employmentEmployee,
+    state.employees.map((employee) => [
+      employee.employeeId,
+      `${employee.name} â€” ${employee.employeeNumber ?? employee.employeeId}`,
+    ]),
+    "â€” SELECT EMPLOYEE â€”",
+  );
+  const selectedOrigin = agentAccessOrigin.value;
+  agentAccessOrigin.replaceChildren(
+    ...(state.agentPortalOrigins?.length
+      ? state.agentPortalOrigins.map((origin) => new Option(origin, origin))
+      : [new Option(location.origin, location.origin)]),
+  );
+  if (
+    [...agentAccessOrigin.options].some(
+      (option) => option.value === selectedOrigin,
+    )
+  )
+    agentAccessOrigin.value = selectedOrigin;
+  replaceOptions(
     playwallDocument,
     state.content
       .filter((item) => /^playwall-(agency|anomaly|reality)-/.test(item.id))
@@ -150,6 +235,87 @@ function renderState(state) {
   );
   renderAssignedPlaywall();
   renderReminders();
+  renderAgentAccess();
+  renderEmploymentStatus();
+}
+
+function renderEmploymentStatus() {
+  const employee = latestState?.employees.find(
+    (item) => item.employeeId === employmentEmployee.value,
+  );
+  const current = document.querySelector("#employment-current-status");
+  current.textContent = employee
+    ? `${employee.status}${employee.missionMvp ? " // MISSION MVP" : ""}`
+    : "SELECT EMPLOYEE";
+  current.classList.toggle("mvp", Boolean(employee?.missionMvp));
+  for (const id of [
+    "employment-probation",
+    "employment-active",
+    "employment-mvp",
+    "employment-mvp-clear",
+  ]) {
+    document.querySelector(`#${id}`).disabled = !employee;
+  }
+}
+
+async function setEmploymentStatus(status) {
+  if (!employmentEmployee.value) return;
+  try {
+    await request("/api/supervisor/mutate", {
+      confirmation: "CONFIRM",
+      command: {
+        type: "SET_EMPLOYEE_STATUS",
+        employeeId: employmentEmployee.value,
+        status,
+      },
+    });
+    employmentResult.textContent = `EMPLOYEE STATUS CHANGED TO ${status}.`;
+  } catch (error) {
+    employmentResult.textContent = `ERROR: ${error.message}`;
+  }
+}
+
+async function setMissionMvp(enabled) {
+  if (!employmentEmployee.value) return;
+  try {
+    await request("/api/supervisor/mutate", {
+      confirmation: "CONFIRM",
+      command: {
+        type: "SET_EMPLOYEE_MISSION_MVP",
+        employeeId: employmentEmployee.value,
+        enabled,
+      },
+    });
+    employmentResult.textContent = enabled
+      ? "MISSION MVP DESIGNATION RECORDED. PREVIOUS DESIGNATION CLEARED."
+      : "MISSION MVP DESIGNATION CLEARED.";
+  } catch (error) {
+    employmentResult.textContent = `ERROR: ${error.message}`;
+  }
+}
+
+function renderAgentAccess() {
+  const access = latestState?.agentAccess?.find(
+    (item) => item.employeeId === agentAccessEmployee.value,
+  );
+  agentAccessStatus.textContent = access?.unlocked
+    ? "UNLOCKED // IN BUILDING"
+    : "LOCKED";
+  agentAccessStatus.classList.toggle("unlocked", Boolean(access?.unlocked));
+  const origin = agentAccessOrigin.value || location.origin;
+  agentAccessUrl.value = access ? `${origin}${access.path}` : "";
+  document.querySelector("#agent-force-logout").disabled = !access?.unlocked;
+  const device = latestState?.deviceAccess?.find(
+    (item) => item.employeeId === agentAccessEmployee.value,
+  );
+  document.querySelector("#approved-device").textContent =
+    device?.approvedDeviceLabel ?? "NONE APPROVED";
+  document.querySelector("#observed-device").textContent = device?.observed
+    ? `${device.observed.label} // ${new Date(device.observed.observedAt).toLocaleString()}`
+    : "NONE OBSERVED";
+  document.querySelector("#observed-device-ip").textContent =
+    device?.observed?.ip ?? "â€”";
+  document.querySelector("#approve-agent-device").disabled = !device?.observed;
 }
 
 function renderReminders() {
