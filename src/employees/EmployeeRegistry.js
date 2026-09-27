@@ -120,6 +120,20 @@ export class EmployeeRegistry {
     return { uid, employee: copyEmployee(employee) };
   }
 
+  async removeByEmployeeId(employeeId) {
+    const entry = [...this.#employees.entries()].find(
+      ([, employee]) => employee.employeeId === employeeId,
+    );
+    if (!entry) throw new Error(`Unknown employee: ${employeeId}`);
+
+    const [uid, employee] = entry;
+    const updated = new Map(this.#employees);
+    updated.delete(uid);
+    await persistEmployees(this.#filePath, updated);
+    this.#employees = updated;
+    return { uid, employee: copyEmployee(employee) };
+  }
+
   get size() {
     return this.#employees.size;
   }

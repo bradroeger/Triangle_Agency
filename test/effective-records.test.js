@@ -26,12 +26,14 @@ test("merges employee clearance, status, and permission overrides", () => {
     status: "PROBATION",
     missionMvp: true,
     demerits: 4,
+    commendations: 6,
     permissions: { allow: ["lift"], deny: [] },
   });
   assert.equal(effective.clearance, 4);
   assert.equal(effective.status, "PROBATION");
   assert.equal(effective.missionMvp, true);
   assert.equal(effective.demerits, 4);
+  assert.equal(effective.commendations, 6);
   assert.deepEqual(effective.permissions, { allow: ["lift"], deny: [] });
 });
 

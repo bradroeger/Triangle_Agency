@@ -35,6 +35,7 @@ const agentAccessOrigin = document.querySelector("#agent-access-origin");
 const agentAccessResult = document.querySelector("#agent-access-result");
 const employmentEmployee = document.querySelector("#employment-employee");
 const employmentResult = document.querySelector("#employment-result");
+const employmentRoster = document.querySelector("#employment-roster");
 let latestState;
 installRedThreeTreatment();
 socket.on("supervisor-state", renderState);
@@ -183,33 +184,33 @@ function renderState(state) {
     playwallEmployee,
     state.employees.map((employee) => [
       employee.employeeId,
-      `${employee.name} — ${employee.employeeNumber ?? employee.employeeId}`,
+      `${employee.name} // ${employee.employeeNumber ?? employee.employeeId}`,
     ]),
-    "— SELECT EMPLOYEE —",
+    "-- SELECT EMPLOYEE --",
   );
   replaceOptions(
     reminderEmployee,
     state.employees.map((employee) => [
       employee.employeeId,
-      `${employee.name} — ${employee.employeeNumber ?? employee.employeeId}`,
+      `${employee.name} // ${employee.employeeNumber ?? employee.employeeId}`,
     ]),
-    "— SELECT EMPLOYEE —",
+    "-- SELECT EMPLOYEE --",
   );
   replaceOptions(
     agentAccessEmployee,
     state.employees.map((employee) => [
       employee.employeeId,
-      `${employee.name} â€” ${employee.employeeNumber ?? employee.employeeId}`,
+      `${employee.name} // ${employee.employeeNumber ?? employee.employeeId}`,
     ]),
-    "â€” SELECT EMPLOYEE â€”",
+    "-- SELECT EMPLOYEE --",
   );
   replaceOptions(
     employmentEmployee,
     state.employees.map((employee) => [
       employee.employeeId,
-      `${employee.name} â€” ${employee.employeeNumber ?? employee.employeeId}`,
+      `${employee.name} // ${employee.employeeNumber ?? employee.employeeId}`,
     ]),
-    "â€” SELECT EMPLOYEE â€”",
+    "-- SELECT EMPLOYEE --",
   );
   const selectedOrigin = agentAccessOrigin.value;
   agentAccessOrigin.replaceChildren(
@@ -237,6 +238,57 @@ function renderState(state) {
   renderReminders();
   renderAgentAccess();
   renderEmploymentStatus();
+  renderEmploymentRoster();
+}
+
+function renderEmploymentRoster() {
+  employmentRoster.replaceChildren(
+    ...(latestState?.employees ?? []).map((employee) => {
+      const card = document.createElement("article");
+      card.className = `employment-card${employee.missionMvp ? " mission-mvp" : ""}${employee.status === "PROBATION" ? " probation" : ""}`;
+      const heading = document.createElement("div");
+      const name = document.createElement("strong");
+      name.textContent = employee.name;
+      const number = document.createElement("span");
+      number.textContent = employee.employeeNumber ?? employee.employeeId;
+      heading.append(name, number);
+      const summary = document.createElement("p");
+      summary.textContent = `${employee.status} // ${employee.commendations} COMMENDATIONS // ${employee.demerits} DEMERITS${employee.missionMvp ? " // MISSION MVP" : ""}`;
+      const actions = document.createElement("div");
+      actions.className = "employment-card-actions";
+      actions.append(
+        rosterButton("PROBATION", () =>
+          setEmploymentStatus("PROBATION", employee.employeeId),
+        ),
+        rosterButton("ACTIVE", () =>
+          setEmploymentStatus("ACTIVE", employee.employeeId),
+        ),
+        rosterButton("+ COMMENDATION", () =>
+          addCommendation(employee.employeeId),
+        ),
+        rosterButton("+ DEMERIT", () => addDemerit(employee.employeeId)),
+        rosterButton("MISSION MVP", () =>
+          setMissionMvp(true, employee.employeeId),
+        ),
+        rosterButton(
+          "REMOVE EMPLOYEE",
+          () => removeEmployee(employee.employeeId, employee.name),
+          "danger",
+        ),
+      );
+      card.append(heading, summary, actions);
+      return card;
+    }),
+  );
+}
+
+function rosterButton(label, handler, className = "") {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.textContent = label;
+  button.className = className;
+  button.addEventListener("click", () => void handler());
+  return button;
 }
 
 function renderEmploymentStatus() {
@@ -258,14 +310,17 @@ function renderEmploymentStatus() {
   }
 }
 
-async function setEmploymentStatus(status) {
-  if (!employmentEmployee.value) return;
+async function setEmploymentStatus(
+  status,
+  employeeId = employmentEmployee.value,
+) {
+  if (!employeeId) return;
   try {
     await request("/api/supervisor/mutate", {
       confirmation: "CONFIRM",
       command: {
         type: "SET_EMPLOYEE_STATUS",
-        employeeId: employmentEmployee.value,
+        employeeId,
         status,
       },
     });
@@ -275,20 +330,69 @@ async function setEmploymentStatus(status) {
   }
 }
 
-async function setMissionMvp(enabled) {
-  if (!employmentEmployee.value) return;
+async function setMissionMvp(enabled, employeeId = employmentEmployee.value) {
+  if (!employeeId) return;
   try {
     await request("/api/supervisor/mutate", {
       confirmation: "CONFIRM",
       command: {
         type: "SET_EMPLOYEE_MISSION_MVP",
-        employeeId: employmentEmployee.value,
+        employeeId,
         enabled,
       },
     });
     employmentResult.textContent = enabled
       ? "MISSION MVP DESIGNATION RECORDED. PREVIOUS DESIGNATION CLEARED."
       : "MISSION MVP DESIGNATION CLEARED.";
+  } catch (error) {
+    employmentResult.textContent = `ERROR: ${error.message}`;
+  }
+}
+
+async function addCommendation(employeeId) {
+  try {
+    await request("/api/supervisor/mutate", {
+      confirmation: "CONFIRM",
+      command: { type: "ADD_EMPLOYEE_COMMENDATION", employeeId },
+    });
+    employmentResult.textContent = "COMMENDATION ADDED.";
+  } catch (error) {
+    employmentResult.textContent = `ERROR: ${error.message}`;
+  }
+}
+
+async function addDemerit(employeeId) {
+  try {
+    await request("/api/supervisor/mutate", {
+      confirmation: "CONFIRM",
+      command: { type: "ADD_EMPLOYEE_DEMERIT", employeeId },
+    });
+    employmentResult.textContent = "DEMERIT ADDED.";
+  } catch (error) {
+    employmentResult.textContent = `ERROR: ${error.message}`;
+  }
+}
+
+async function removeEmployee(employeeId, employeeName) {
+  const confirmation = window.prompt(
+    `Permanently remove ${employeeName} (${employeeId}) from employees.json? Type REMOVE to confirm.`,
+  );
+  if (confirmation !== "REMOVE") {
+    employmentResult.textContent = "EMPLOYEE REMOVAL CANCELLED.";
+    return;
+  }
+  try {
+    const response = await fetch(
+      `/api/supervisor/employees/${encodeURIComponent(employeeId)}`,
+      {
+        method: "DELETE",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ confirmation }),
+      },
+    );
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error);
+    employmentResult.textContent = `${employeeName} REMOVED FROM EMPLOYEE REGISTRY.`;
   } catch (error) {
     employmentResult.textContent = `ERROR: ${error.message}`;
   }
@@ -314,7 +418,7 @@ function renderAgentAccess() {
     ? `${device.observed.label} // ${new Date(device.observed.observedAt).toLocaleString()}`
     : "NONE OBSERVED";
   document.querySelector("#observed-device-ip").textContent =
-    device?.observed?.ip ?? "â€”";
+    device?.observed?.ip ?? "--";
   document.querySelector("#approve-agent-device").disabled = !device?.observed;
 }
 

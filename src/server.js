@@ -19,6 +19,7 @@ import {
 import { NfcService } from "./nfc/NfcService.js";
 import { GMMessageRegistry } from "./messages/GMMessageRegistry.js";
 import { normalizeUid } from "./nfc/uid.js";
+import { createOfficeQrSvg } from "./officeQr.js";
 import { ResourceRegistry } from "./resources/ResourceRegistry.js";
 import { StateStore } from "./state/StateStore.js";
 import { TriggerEngine } from "./triggers/TriggerEngine.js";
@@ -85,6 +86,10 @@ try {
 
 const host = "0.0.0.0";
 const port = parsePort(process.env.PORT);
+const esp32Url = (process.env.ESP32_URL ?? "http://192.168.50.91").replace(
+  /\/+$/,
+  "",
+);
 const app = express();
 const httpServer = http.createServer(app);
 const io = new SocketServer(httpServer);
@@ -120,8 +125,7 @@ let displayRevision = 0;
 let shuttingDown = false;
 let anomalyInputBlocked = false;
 let anomalyFailsafe;
-let heldBadgeUid = null;
-let badgeHoldUntil = 0;
+let esp32CommandQueue = Promise.resolve();
 
 app.use(express.json({ limit: "16kb" }));
 app.use(express.static(fileURLToPath(new URL("./public", import.meta.url))));
@@ -168,6 +172,12 @@ app.use(
     fileURLToPath(new URL("../data/assets/office", import.meta.url)),
   ),
 );
+app.use(
+  "/requisition-media",
+  express.static(
+    fileURLToPath(new URL("../data/assets/requisitions", import.meta.url)),
+  ),
+);
 
 app.get("/content-assets/:contentId", (request, response) => {
   const asset = terminalApplication.getContentAsset(
@@ -202,6 +212,42 @@ app.get("/api/agent/:employeeId/content/:contentId", (request, response) => {
   if (!asset) return response.status(404).send("File asset not found.");
   response.type(asset.mimeType);
   return response.sendFile(path.resolve(asset.filePath));
+});
+
+app.post("/api/agent/:employeeId/requisitions", async (request, response) => {
+  const employeeId = request.params.employeeId;
+  if (!activeAgents.has(employeeId)) {
+    return response.status(403).json({ ok: false, error: "Employee portal is locked." });
+  }
+  try {
+    const requisition = await terminalApplication.requestEmployeeRequisition(
+      employeeId,
+      request.body?.itemId,
+    );
+    broadcastAgentPortal(employeeId);
+    broadcastSupervisorState();
+    return response.status(201).json({ ok: true, requisition });
+  } catch (error) {
+    return response.status(400).json({ ok: false, error: error.message });
+  }
+});
+
+app.post("/api/agent/:employeeId/pto", async (request, response) => {
+  const employeeId = request.params.employeeId;
+  if (!activeAgents.has(employeeId)) {
+    return response.status(403).json({ ok: false, error: "Employee portal is locked." });
+  }
+  try {
+    const ptoRequest = await terminalApplication.requestEmployeePto(
+      employeeId,
+      request.body ?? {},
+    );
+    broadcastAgentPortal(employeeId);
+    broadcastSupervisorState();
+    return response.status(201).json({ ok: true, ptoRequest });
+  } catch (error) {
+    return response.status(400).json({ ok: false, error: error.message });
+  }
 });
 
 app.post("/api/agent/:employeeId/viewed", async (request, response) => {
@@ -428,8 +474,31 @@ app.post("/__simulate", (request, response) => {
   }
 });
 
-app.post("/api/anomaly-sequence-complete", (_request, response) => {
-  finishAnomalyInputBlock("sequence complete");
+app.post("/api/anomaly-sequence-start", async (_request, response) => {
+  try {
+    await queueEsp32Command("chaos");
+    response.json({ ok: true });
+  } catch (error) {
+    response.status(502).json({ ok: false, error: error.message });
+  }
+});
+
+app.post("/api/anomaly-sequence-boot", async (_request, response) => {
+  try {
+    await queueEsp32Command("boot-sequence");
+    response.json({ ok: true });
+  } catch (error) {
+    response.status(502).json({ ok: false, error: error.message });
+  }
+});
+
+app.post("/api/anomaly-sequence-complete", async (_request, response) => {
+  await finishAnomalyInputBlock("sequence complete");
+  response.json({ ok: true });
+});
+
+app.post("/api/anomaly-sequence-cancel", async (_request, response) => {
+  await finishAnomalyInputBlock("sequence cancelled");
   response.json({ ok: true });
 });
 
@@ -481,6 +550,40 @@ app.post("/api/supervisor/employees", async (request, response) => {
     return response.status(400).json({ ok: false, error: error.message });
   }
 });
+
+app.delete(
+  "/api/supervisor/employees/:employeeId",
+  async (request, response) => {
+    if (request.body?.confirmation !== "REMOVE") {
+      return response.status(400).json({
+        ok: false,
+        error: 'Type "REMOVE" to confirm employee removal.',
+      });
+    }
+    try {
+      const employeeId = request.params.employeeId;
+      const removed = await employeeRegistry.removeByEmployeeId(employeeId);
+      activeAgents.delete(employeeId);
+      recentAgentDevices.delete(employeeId);
+      if (currentBadge?.employee?.employeeId === employeeId)
+        currentBadge = null;
+      await campaignLogger
+        .append({
+          event: "SUPERVISOR_ACTION",
+          action: "REMOVE_EMPLOYEE",
+          employeeId,
+        })
+        .catch((error) => console.warn(error.message));
+      broadcastState();
+      broadcastAgentPortal(employeeId);
+      broadcastSupervisorState();
+      return response.json({ ok: true, ...removed });
+    } catch (error) {
+      const status = error.message.startsWith("Unknown employee:") ? 404 : 400;
+      return response.status(status).json({ ok: false, error: error.message });
+    }
+  },
+);
 
 app.post("/api/supervisor/agent-logout", (request, response) => {
   if (request.body?.confirmation !== "CONFIRM")
@@ -748,15 +851,6 @@ async function handleBadgeScanned({ readerId, uid, simulated }) {
     return;
   }
   const knownEmployee = terminalApplication.getEffectiveEmployeeByUid(uid);
-  if (
-    uid === heldBadgeUid &&
-    Date.now() < badgeHoldUntil &&
-    !activeAgents.has(knownEmployee?.employeeId)
-  ) {
-    return;
-  }
-  heldBadgeUid = null;
-  badgeHoldUntil = 0;
   const scanRevision = ++displayRevision;
   const badge = {
     uid,
@@ -773,10 +867,22 @@ async function handleBadgeScanned({ readerId, uid, simulated }) {
   console.log(`${simulated ? "[SIMULATED] " : ""}Badge scanned: ${uid}`);
   io.emit("badge-scanned", badge);
   if (knownEmployee && activeAgents.has(knownEmployee.employeeId)) {
+    const farewell = gmMessageRegistry.findCheckoutMessage();
     lockAgentPortal(knownEmployee.employeeId, "BADGE");
-    currentBadge = { ...badge, readerId, employee: knownEmployee };
-    io.emit("office-agent-logout", { employee: knownEmployee });
-    io.emit("display-reset");
+    currentBadge = {
+      ...badge,
+      readerId,
+      employee: knownEmployee,
+      checkoutMessage: farewell.message,
+      checkoutMessageCategory: farewell.category,
+    };
+    const checkout = {
+      employee: knownEmployee,
+      message: farewell.message,
+      category: farewell.category,
+    };
+    io.emit("office-agent-logout", checkout);
+    io.emit("employee-logout", checkout);
     return;
   }
   const result = await terminalApplication.processScan({
@@ -792,6 +898,17 @@ async function handleBadgeScanned({ readerId, uid, simulated }) {
     interaction: result,
   };
   if (result.employee) {
+    const agentPortalOrigin =
+      localNetworkOrigins()[0] ?? `http://localhost:${port}`;
+    const agentUrl = new URL(
+      `/agent/${encodeURIComponent(result.employee.employeeId)}`,
+      `${agentPortalOrigin}/`,
+    ).href;
+    currentBadge.agentUrl = agentUrl;
+    currentBadge.agentQrSvg = createOfficeQrSvg(agentUrl);
+    queueEsp32Command("login").catch((error) => {
+      console.warn(`Could not activate ESP32 login lights: ${error.message}`);
+    });
     unlockAgentPortal(result.employee.employeeId);
     const unresolvedFiles = listUnresolvedPlaywallFiles(
       result.employee.employeeId,
@@ -819,6 +936,8 @@ async function handleBadgeScanned({ readerId, uid, simulated }) {
       gmMessageCategory: gmSelection.category,
       unresolvedFiles,
       reminders,
+      agentUrl: currentBadge.agentUrl,
+      agentQrSvg: currentBadge.agentQrSvg,
     });
     const agencyDocuments = terminalApplication.listEmployeePlaywallContent(
       result.employee.employeeId,
@@ -921,13 +1040,9 @@ function handleBadgeRemoved({ readerId, uid }) {
   io.emit("badge-removed", { readerId, uid });
   if (currentBadge?.readerId !== readerId || currentBadge.uid !== uid) return;
   const removalRevision = displayRevision;
-  heldBadgeUid = uid;
-  badgeHoldUntil = Date.now() + 10_000;
   setTimeout(() => {
     if (displayRevision !== removalRevision || anomalyInputBlocked) return;
     currentBadge = null;
-    heldBadgeUid = null;
-    badgeHoldUntil = 0;
     io.emit("display-reset");
   }, 10_000);
 }
@@ -944,17 +1059,33 @@ function beginAnomalyInputBlock() {
 }
 
 function finishAnomalyInputBlock(reason) {
-  if (!anomalyInputBlocked) return;
+  const lightReset = queueEsp32Command("startup").catch((error) => {
+    console.warn(`Could not reset ESP32 lights: ${error.message}`);
+  });
+  if (!anomalyInputBlocked) return lightReset;
   anomalyInputBlocked = false;
   clearTimeout(anomalyFailsafe);
   anomalyFailsafe = undefined;
   displayRevision += 1;
   currentBadge = null;
-  heldBadgeUid = null;
-  badgeHoldUntil = 0;
   console.log(`Badge input restored (${reason}).`);
   io.emit("display-reset");
   io.emit("input-restored");
+  return lightReset;
+}
+
+function queueEsp32Command(command) {
+  const pendingCommand = esp32CommandQueue.then(async () => {
+    const response = await fetch(`${esp32Url}/${command}`, {
+      method: "POST",
+      signal: AbortSignal.timeout(2500),
+    });
+    if (!response.ok) {
+      throw new Error(`ESP32 /${command} returned HTTP ${response.status}`);
+    }
+  });
+  esp32CommandQueue = pendingCommand.catch(() => {});
+  return pendingCommand;
 }
 
 function enableTestReader() {
@@ -1055,6 +1186,11 @@ function agentPortalSnapshot(employeeId) {
     loggedInAt: activeAgents.get(employeeId).loggedInAt,
     employee,
     files,
+    requisitions: {
+      catalog: terminalApplication.listRequisitionItems(),
+      history: terminalApplication.listEmployeeRequisitions(employeeId),
+    },
+    ptoRequests: terminalApplication.listEmployeePtoRequests(employeeId),
   };
 }
 
@@ -1075,8 +1211,13 @@ function unlockAgentPortal(employeeId) {
 }
 
 function lockAgentPortal(employeeId, source) {
-  activeAgents.delete(employeeId);
+  const wasActive = activeAgents.delete(employeeId);
   console.log(`Agent portal locked: ${employeeId} (${source})`);
+  if (wasActive && activeAgents.size === 0) {
+    queueEsp32Command("logout").catch((error) => {
+      console.warn(`Could not deactivate ESP32 login lights: ${error.message}`);
+    });
+  }
   broadcastAgentPortal(employeeId);
   broadcastSupervisorState();
 }

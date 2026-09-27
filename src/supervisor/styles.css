@@ -59,6 +59,56 @@ header {
   background: #f1c83c;
   box-shadow: 3px 3px 0 var(--red);
 }
+.employment-roster {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 0.8rem;
+  margin-top: 1.2rem;
+}
+.employment-card {
+  padding: 0.9rem;
+  background: #fff9eb;
+  border: 3px solid #17110f;
+  box-shadow: 4px 4px 0 #17110f;
+}
+.employment-card.probation {
+  border-color: var(--red);
+  box-shadow: 4px 4px 0 var(--red);
+}
+.employment-card.mission-mvp {
+  background: #f1c83c;
+}
+.employment-card > div:first-child {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.7rem;
+}
+.employment-card > div:first-child span {
+  font:
+    700 0.68rem "Courier New",
+    monospace;
+}
+.employment-card p {
+  font:
+    700 0.68rem "Courier New",
+    monospace;
+}
+.employment-card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+.employment-card-actions button {
+  padding: 0.45rem;
+  font-size: 0.62rem;
+  box-shadow: 2px 2px 0 #17110f;
+}
+.employment-card-actions button.danger {
+  margin-left: auto;
+  border-color: #790d12;
+  background: #b71921;
+  color: #fff;
+}
 .agent-access-controls {
   display: grid;
   grid-template-columns:

@@ -15,6 +15,14 @@ const validRegistry = {
     strange: ten("Strange"),
     unhinged: ten("Unhinged"),
   },
+  checkout: {
+    weights: { benign: 75, strange: 20, unhinged: 5 },
+    defaults: {
+      benign: ten("Goodbye"),
+      strange: ten("Odd goodbye"),
+      unhinged: ten("Wrong goodbye"),
+    },
+  },
 };
 
 async function load(data, random = () => 0) {
@@ -62,6 +70,15 @@ test("forces an unhinged message by the fourth sign-in without one", async () =>
   assert.deepEqual(registry.findForEmployee("TA-X"), {
     message: "Unhinged 1",
     category: "unhinged",
+  });
+  assert.equal(registry.findForEmployee("TA-X").category, "benign");
+});
+
+test("selects a checkout message without changing sign-in guarantees", async () => {
+  const registry = await load(validRegistry, () => 0);
+  assert.deepEqual(registry.findCheckoutMessage(), {
+    message: "Goodbye 1",
+    category: "benign",
   });
   assert.equal(registry.findForEmployee("TA-X").category, "benign");
 });

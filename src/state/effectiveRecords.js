@@ -14,6 +14,9 @@ export function mergeEmployee(staticEmployee, override = {}) {
       missionMvp: override.missionMvp,
     }),
     ...(override.demerits !== undefined && { demerits: override.demerits }),
+    ...(override.commendations !== undefined && {
+      commendations: override.commendations,
+    }),
     permissions: {
       allow: [...(overridePermissions?.allow ?? staticPermissions.allow)],
       deny: [...(overridePermissions?.deny ?? staticPermissions.deny)],

@@ -67,11 +67,31 @@ test("persists flags, overrides, unlocked content, and trigger history atomicall
     await store.applyEmployeeOverride("TA-1", {
       clearance: 4,
       demerits: 2,
+      commendations: 7,
       approvedDeviceId: "12345678-1234-1234-1234-123456789abc",
       approvedDeviceLabel: "Approved phone",
       playwallDocuments: ["playwall-agency-a1"],
       seenPlaywallDocuments: ["playwall-agency-a1"],
       reminders: ["Complete mandatory corridor awareness training."],
+      requisitions: [
+        {
+          id: "request-1",
+          itemId: "official-mug-12oz",
+          name: "Official Triangle Agency Mug (12oz)",
+          cost: 3,
+          requestedAt: "2026-08-27T12:00:00.000Z",
+        },
+      ],
+      ptoRequests: [
+        {
+          id: "pto-1",
+          startDate: "2026-09-01",
+          endDate: "2026-09-05",
+          reason: "Rest and recovery.",
+          requestedAt: "2026-08-27T12:00:00.000Z",
+          status: "PENDING_MANAGER_APPROVAL",
+        },
+      ],
     });
     await store.applyResourceOverride("archive", { enabled: false });
     await store.setMissionMvp("TA-1", true);
@@ -82,6 +102,7 @@ test("persists flags, overrides, unlocked content, and trigger history atomicall
     assert.equal(reloaded.getFlag("count"), 3);
     assert.equal(reloaded.getEmployeeOverride("TA-1").clearance, 4);
     assert.equal(reloaded.getEmployeeOverride("TA-1").demerits, 2);
+    assert.equal(reloaded.getEmployeeOverride("TA-1").commendations, 7);
     assert.equal(
       reloaded.getEmployeeOverride("TA-1").approvedDeviceLabel,
       "Approved phone",
@@ -96,6 +117,11 @@ test("persists flags, overrides, unlocked content, and trigger history atomicall
     assert.deepEqual(reloaded.getEmployeeOverride("TA-1").reminders, [
       "Complete mandatory corridor awareness training.",
     ]);
+    assert.equal(reloaded.getEmployeeOverride("TA-1").requisitions[0].cost, 3);
+    assert.equal(
+      reloaded.getEmployeeOverride("TA-1").ptoRequests[0].status,
+      "PENDING_MANAGER_APPROVAL",
+    );
     assert.equal(reloaded.getEmployeeOverride("TA-1").missionMvp, undefined);
     assert.equal(reloaded.getEmployeeOverride("TA-2").missionMvp, true);
     assert.equal(reloaded.getResourceOverride("archive").enabled, false);

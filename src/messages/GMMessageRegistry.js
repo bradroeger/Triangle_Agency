@@ -8,12 +8,14 @@ export class GMMessageRegistry {
   #weights;
   #random;
   #signInsSinceUnhinged = 0;
+  #checkout;
 
-  constructor({ specific, defaults, weights }, random = Math.random) {
+  constructor({ specific, defaults, weights, checkout }, random = Math.random) {
     this.#specific = new Map(Object.entries(specific));
     this.#defaults = defaults;
     this.#weights = weights;
     this.#random = random;
+    this.#checkout = checkout;
   }
 
   static async load(filePath, random = Math.random) {
@@ -47,6 +49,19 @@ export class GMMessageRegistry {
 
     this.#signInsSinceUnhinged = 0;
     return this.#selectDefault("unhinged");
+  }
+
+  findCheckoutMessage() {
+    const category = selectWeightedCategory(
+      this.#checkout.weights,
+      this.#random(),
+    );
+    const messages = this.#checkout.defaults[category];
+    const index = Math.min(
+      Math.floor(this.#random() * messages.length),
+      messages.length - 1,
+    );
+    return { message: messages[index], category };
   }
 
   #selectDefault(category) {
@@ -93,6 +108,32 @@ function validateRegistry(source) {
     ) {
       throw new Error(
         `GM message weight "${category}" must be a positive number.`,
+      );
+    }
+  }
+  validateCheckout(source.checkout);
+}
+
+function validateCheckout(checkout) {
+  if (!checkout || typeof checkout !== "object" || Array.isArray(checkout)) {
+    throw new Error('GM message registry field "checkout" must be an object.');
+  }
+  for (const category of categories) {
+    const messages = checkout.defaults?.[category];
+    if (!Array.isArray(messages) || messages.length !== 10) {
+      throw new Error(
+        `GM checkout message category "${category}" must contain exactly 10 messages.`,
+      );
+    }
+    messages.forEach((message) =>
+      validateMessage(message, `checkout.defaults.${category}`),
+    );
+    if (
+      typeof checkout.weights?.[category] !== "number" ||
+      checkout.weights[category] <= 0
+    ) {
+      throw new Error(
+        `GM checkout message weight "${category}" must be a positive number.`,
       );
     }
   }

@@ -32,6 +32,12 @@ const anomalousFilesCount = document.querySelector("#anomalous-files-count");
 const anomalousFilesList = document.querySelector("#anomalous-files-list");
 const personalMessage = document.querySelector("#personal-message");
 const personalMessageText = document.querySelector("#personal-message-text");
+const agentPortalAccess = document.querySelector("#agent-portal-access");
+const agentPortalLink = document.querySelector("#agent-portal-link");
+const agentPortalQr = document.querySelector("#agent-portal-qr");
+const ANOMALY_SEQUENCE_DURATION_MS = 46100;
+const ANOMALY_BOOT_LIGHTS_START_MS = 12700;
+const AGENCY_BOOT_SCREEN_START_MS = 44400;
 let anomalyTimers = [];
 let matrixAnimationFrame;
 let matrixDrops = [];
@@ -146,13 +152,21 @@ debugUid.addEventListener("keydown", (event) => {
 
 socket.on("terminal-state", ({ badge, testMode }) => {
   setDebugMode(testMode);
-  if (badge?.employee) {
+  if (badge?.checkoutMessage && badge.employee) {
+    showCheckout(
+      badge.employee,
+      badge.checkoutMessage,
+      badge.checkoutMessageCategory,
+    );
+  } else if (badge?.employee) {
     showEmployee(
       badge.employee,
       badge.gmMessage ?? "",
       badge.gmMessageCategory ?? "specific",
       badge.unresolvedFiles ?? [],
       badge.reminders ?? [],
+      badge.agentUrl,
+      badge.agentQrSvg,
     );
   } else if (badge) showUnknown();
 });
@@ -165,11 +179,24 @@ socket.on(
     gmMessageCategory,
     unresolvedFiles: files,
     reminders,
+    agentUrl,
+    agentQrSvg,
   }) => {
     playConfirmationTone();
-    showEmployee(employee, gmMessage, gmMessageCategory, files, reminders);
+    showEmployee(
+      employee,
+      gmMessage,
+      gmMessageCategory,
+      files,
+      reminders,
+      agentUrl,
+      agentQrSvg,
+    );
   },
 );
+socket.on("office-agent-logout", ({ employee, message, category }) => {
+  showCheckout(employee, message, category);
+});
 socket.on("office-files-updated", ({ unresolvedFiles: files }) => {
   showUnresolvedFiles(files, activeDependant);
 });
@@ -196,6 +223,8 @@ function showEmployee(
   gmMessageCategory,
   files = [],
   reminders = [],
+  agentUrl,
+  agentQrSvg,
 ) {
   cancelAnomalySequence();
   const values = {
@@ -216,6 +245,16 @@ function showEmployee(
   waiting.hidden = true;
   unknown.hidden = true;
   record.hidden = false;
+  agentPortalAccess.hidden = !agentUrl || !agentQrSvg;
+  if (agentPortalAccess.hidden) {
+    agentPortalQr.removeAttribute("src");
+    agentPortalLink.removeAttribute("href");
+    agentPortalLink.textContent = "";
+  } else {
+    agentPortalQr.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(agentQrSvg)}`;
+    agentPortalLink.href = agentUrl;
+    agentPortalLink.textContent = agentUrl;
+  }
   showUnresolvedFiles(files, activeDependant);
   gmEye.hidden = gmMessageCategory !== "unhinged";
   scheduleSpokenGreeting({
@@ -226,6 +265,25 @@ function showEmployee(
     reminders,
   });
   if (gmMessageCategory === "unhinged") startAnomalySequence();
+}
+
+function showCheckout(employee, message, category) {
+  cancelAnomalySequence();
+  cancelSpeech();
+  waiting.hidden = false;
+  record.hidden = true;
+  unknown.hidden = true;
+  waiting.textContent = `GOODBYE, ${employee.name.toUpperCase()} // ${message}`;
+  waiting.classList.toggle("checkout-unhinged", category === "unhinged");
+  if (
+    officeAudio.getAttribute("aria-pressed") === "true" &&
+    "speechSynthesis" in window
+  ) {
+    const farewell = new SpeechSynthesisUtterance(message);
+    farewell.rate = category === "unhinged" ? 0.72 : 0.9;
+    farewell.pitch = category === "unhinged" ? 0.55 : 0.82;
+    window.speechSynthesis.speak(farewell);
+  }
 }
 
 function reset() {
@@ -239,6 +297,7 @@ function reset() {
   hidePersonalMessage();
   showUnresolvedFiles([]);
   waiting.textContent = "PRESENT EMPLOYEE IDENTIFICATION";
+  waiting.classList.remove("checkout-unhinged");
 }
 
 function updateAgencyClock() {
@@ -523,6 +582,9 @@ function cancelSpeech() {
 
 function startAnomalySequence() {
   // The incident takes exclusive control of the audio channel immediately.
+  postJson("/api/anomaly-sequence-start", {}).catch((error) => {
+    console.error("Could not start terminal CHAOS lights:", error);
+  });
   cancelSpeech();
   selectPresenceImage();
   document.body.classList.add("anomaly-signal");
@@ -564,7 +626,10 @@ function startAnomalySequence() {
       blackout.hidden = false;
       blackout.className = "blackout dead";
       rebootText.textContent = "";
-    }, 12700),
+      postJson("/api/anomaly-sequence-boot", {}).catch((error) => {
+        console.error("Could not start terminal boot lights:", error);
+      });
+    }, ANOMALY_BOOT_LIGHTS_START_MS),
     setTimeout(() => {
       playAsset("bootUp", 0.42, playCrtStartup);
     }, 17700),
@@ -629,12 +694,13 @@ function startAnomalySequence() {
       blackout.className = "blackout rebooting";
       rebootText.textContent =
         "TRIANGLE AGENCY TERMINAL BIOS 3.1 // STARTING AGENCYOS";
-    }, 44400),
-    setTimeout(completeAnomalySequence, 46100),
+    }, AGENCY_BOOT_SCREEN_START_MS),
+    setTimeout(completeAnomalySequence, ANOMALY_SEQUENCE_DURATION_MS),
   );
 }
 
 async function completeAnomalySequence() {
+  anomalyTimers = [];
   try {
     await postJson("/api/anomaly-sequence-complete", {});
   } catch (error) {
@@ -652,9 +718,15 @@ function selectPresenceImage() {
 }
 
 function cancelAnomalySequence() {
+  const wasActive = anomalyTimers.length > 0;
   cancelSpeech();
   for (const timer of anomalyTimers) clearTimeout(timer);
   anomalyTimers = [];
+  if (wasActive) {
+    postJson("/api/anomaly-sequence-cancel", {}).catch((error) => {
+      console.error("Could not reset terminal lights:", error);
+    });
+  }
   document.body.classList.remove("terminal-impact");
   document.body.classList.remove("anomaly-signal");
   agencyClock.closest(".agency-clock").classList.remove("anomaly");

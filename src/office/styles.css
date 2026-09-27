@@ -1347,6 +1347,48 @@ button.enabled {
   border-top: 14px solid var(--red);
   box-shadow: 12px 12px 0 var(--red);
 }
+.agent-portal-access {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  margin: 1.2rem;
+  padding: 1rem;
+  color: #17110f;
+  background: #f0e7d4;
+  border: 3px solid #17110f;
+  border-left: 12px solid var(--red);
+  font-family: "Courier New", monospace;
+}
+.agent-portal-access > div {
+  display: grid;
+  gap: 0.55rem;
+  min-width: 0;
+}
+.agent-portal-access span {
+  color: #8e0710;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+.agent-portal-access strong {
+  font-size: 1rem;
+}
+.agent-portal-access a {
+  overflow-wrap: anywhere;
+  color: #8e0710;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+.agent-portal-access img {
+  display: block;
+  flex: 0 0 auto;
+  width: clamp(144px, 22vw, 192px);
+  aspect-ratio: 1;
+  padding: 4px;
+  background: #fff9eb;
+  border: 2px solid #17110f;
+}
 .unresolved-files {
   position: relative;
   margin: 1.2rem;
@@ -1653,6 +1695,10 @@ footer {
   dl,
   .debug-panel {
     grid-template-columns: 1fr;
+  }
+  .agent-portal-access {
+    align-items: flex-start;
+    flex-direction: column;
   }
   dl div {
     border-right: 0;

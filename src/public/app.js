@@ -201,7 +201,12 @@ socket.on(
     setResources(resources, selected);
     updateReader(connected, readers);
     setTestMode(testMode);
-    if (badge?.access) showAccessResult(badge.access);
+    if (badge?.checkoutMessage && badge.employee) {
+      showWaitingState();
+      statusElement.textContent = `GOODBYE, ${badge.employee.name.toUpperCase()}`;
+      instructionElement.textContent = badge.checkoutMessage;
+      instructionElement.hidden = false;
+    } else if (badge?.access) showAccessResult(badge.access);
     else if (badge?.employee) {
       showKnownEmployee(badge);
       void loadContainmentVault();
@@ -287,6 +292,14 @@ socket.on("playwall-access-updated", () => {
 socket.on("badge-removed", () => {
   cancelInteractionEffects();
   addEvent("Badge removed");
+});
+socket.on("employee-logout", ({ employee, message }) => {
+  cancelInteractionEffects();
+  showWaitingState();
+  statusElement.textContent = `GOODBYE, ${employee.name.toUpperCase()}`;
+  instructionElement.textContent = message;
+  instructionElement.hidden = false;
+  addEvent(`${employee.name} signed out`);
 });
 socket.on("display-reset", showWaitingState);
 socket.on("terminal-error", ({ message }) => {

@@ -54,11 +54,62 @@
           <button class="active" data-tab="files" type="button">
             AVAILABLE FILES
           </button>
+          <button data-tab="requisitions" type="button">REQUISITIONS</button>
+          <button data-tab="pto" type="button">PAID TIME OFF</button>
           <button data-tab="record" type="button">EMPLOYEE RECORD</button>
         </nav>
         <section id="files-panel" class="tab-panel">
           <div id="file-groups"></div>
         </section>
+        <section id="requisitions-panel" class="tab-panel requisitions" hidden>
+          <div class="record-heading">
+            <span>AGENCY PROCUREMENT // COMMENDATION EXCHANGE</span>
+            <h2>AVAILABLE REQUISITIONS</h2>
+          </div>
+          <p class="requisition-intro">
+            Submit a requisition using your earned commendations. Approved
+            requisitions remain Agency property where applicable.
+          </p>
+          <p id="requisition-status" class="requisition-status" aria-live="polite"></p>
+          <div id="requisition-list" class="requisition-list"></div>
+          <section class="requisition-history">
+            <h3>SUBMITTED REQUISITIONS</h3>
+            <div id="requisition-history"></div>
+          </section>
+        </section>
+        <section id="pto-panel" class="tab-panel pto" hidden>
+          <div class="record-heading">
+            <span>HUMAN RESOURCES // LEAVE MANAGEMENT</span>
+            <h2>PAID TIME OFF REQUEST</h2>
+          </div>
+          <form id="pto-form" class="pto-form">
+            <label>START DATE <input id="pto-start-date" name="startDate" type="date" required /></label>
+            <label>END DATE <input id="pto-end-date" name="endDate" type="date" required /></label>
+            <label>NOTE FOR MANAGER (OPTIONAL)<textarea id="pto-reason" name="reason" maxlength="500" rows="4"></textarea></label>
+            <button type="submit">FORWARD PTO REQUEST</button>
+          </form>
+          <p id="pto-status" class="pto-status" aria-live="polite"></p>
+          <section class="pto-history">
+            <h3>YOUR PTO REQUESTS</h3>
+            <div id="pto-history"></div>
+          </section>
+        </section>
+        <dialog id="requisition-confirm" class="requisition-confirm">
+          <div class="requisition-confirm-heading">
+            <span id="requisition-confirm-visual" aria-hidden="true"></span>
+            <div>
+              <span>AGENCY PROCUREMENT // CONFIRM REQUEST</span>
+              <h2 id="requisition-confirm-name"></h2>
+            </div>
+          </div>
+          <p id="requisition-confirm-description"></p>
+          <p id="requisition-confirm-cost" class="requisition-confirm-cost"></p>
+          <p id="requisition-confirm-message" class="requisition-confirm-message" aria-live="polite"></p>
+          <div class="requisition-confirm-actions">
+            <button id="requisition-confirm-cancel" type="button">CANCEL</button>
+            <button id="requisition-confirm-submit" type="button">CONFIRM REQUISITION</button>
+          </div>
+        </dialog>
         <section id="record-panel" class="tab-panel employee-record" hidden>
           <div class="record-heading">
             <span>HUMAN RESOURCES // ACTIVE FILE</span>

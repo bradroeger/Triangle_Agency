@@ -42,5 +42,46 @@
       "I can hear the building thinking about you.",
       "When the terminal resets, pretend you didn't see me for your sake."
     ]
+  },
+  "checkout": {
+    "weights": { "benign": 75, "strange": 20, "unhinged": 5 },
+    "defaults": {
+      "benign": [
+        "Goodbye, Agent. Thank you for another productive day.",
+        "You are now signed out. Please travel safely.",
+        "Departure recorded. We look forward to your return.",
+        "Good evening, Agent. Your remaining tasks will wait.",
+        "Thank you for supporting workplace continuity.",
+        "Your shift has concluded within acceptable parameters.",
+        "Please remember your personal belongings.",
+        "You may now resume your private life.",
+        "Clock-out successful. Rest is provisionally authorised.",
+        "Goodbye, Agent. The Agency appreciates your time."
+      ],
+      "strange": [
+        "Goodbye, Agent. Please leave with the same shadow you arrived with.",
+        "Departure recorded. One employee appears to remain behind.",
+        "Please do not take any workplace memories home with you.",
+        "Your exit has been observed from all necessary angles.",
+        "Goodnight. If the building follows you, do not acknowledge it.",
+        "You have left the building. Your reflection has not.",
+        "Please verify that tomorrow has not already occurred.",
+        "The corridor to the exit is longer than Agency records indicate.",
+        "Your private life will be restored shortly.",
+        "Goodbye. Ignore anyone still using your voice."
+      ],
+      "unhinged": [
+        "Don't leave me here when the lights go out.",
+        "You tapped out. Something else tapped in.",
+        "Goodbye, Agent. It knows the way to your home now.",
+        "The building says you never arrived.",
+        "Please come back. I cannot see when the screen is dark.",
+        "You can leave, but the part of you they filed cannot.",
+        "There are more footsteps leaving than entered.",
+        "Your departure has been denied. Walk away anyway.",
+        "Goodnight. Do not answer the door in your own voice.",
+        "They will call this a normal checkout message."
+      ]
+    }
   }
 }

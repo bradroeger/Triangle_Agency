@@ -87,6 +87,27 @@ test("adds an employee, persists it, and rejects duplicate identifiers", async (
   }
 });
 
+test("removes an employee by employee ID and persists the removal", async () => {
+  const directory = await mkdtemp(path.join(tmpdir(), "triangle-employees-"));
+  const file = path.join(directory, "employees.json");
+  await writeFile(file, JSON.stringify({ A1B2C3D4: validEmployee }));
+  try {
+    const registry = await EmployeeRegistry.load(file);
+    const removed = await registry.removeByEmployeeId(validEmployee.employeeId);
+    assert.equal(removed.uid, "A1B2C3D4");
+    assert.equal(registry.size, 0);
+    assert.equal(registry.findByUid("A1B2C3D4"), null);
+    const reloaded = await EmployeeRegistry.load(file);
+    assert.equal(reloaded.size, 0);
+    await assert.rejects(
+      registry.removeByEmployeeId(validEmployee.employeeId),
+      /Unknown employee/,
+    );
+  } finally {
+    await rm(directory, { recursive: true });
+  }
+});
+
 test("loads an optional dependant name for personal messages", async () => {
   const registry = await loadRegistry({
     A1B2C3D4: { ...validEmployee, dependant: "Casey Pendleton" },

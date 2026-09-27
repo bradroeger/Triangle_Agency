@@ -8,9 +8,31 @@ const viewerBody = document.querySelector("#viewer-body");
 const probationWarning = document.querySelector("#probation-warning");
 const recordFields = document.querySelector("#employee-record-fields");
 const missionMvpBanner = document.querySelector("#mission-mvp-banner");
+const requisitionList = document.querySelector("#requisition-list");
+const requisitionHistory = document.querySelector("#requisition-history");
+const requisitionStatus = document.querySelector("#requisition-status");
+const requisitionDialog = document.querySelector("#requisition-confirm");
+const requisitionConfirmVisual = document.querySelector(
+  "#requisition-confirm-visual",
+);
+const requisitionConfirmName = document.querySelector("#requisition-confirm-name");
+const requisitionConfirmDescription = document.querySelector(
+  "#requisition-confirm-description",
+);
+const requisitionConfirmCost = document.querySelector("#requisition-confirm-cost");
+const requisitionConfirmMessage = document.querySelector(
+  "#requisition-confirm-message",
+);
+const requisitionConfirmSubmit = document.querySelector(
+  "#requisition-confirm-submit",
+);
+const ptoForm = document.querySelector("#pto-form");
+const ptoStatus = document.querySelector("#pto-status");
+const ptoHistory = document.querySelector("#pto-history");
 let viewerObjectUrl;
 let reportedLogin;
 let refreshInProgress = false;
+let selectedRequisition;
 const deviceId = getDeviceId();
 
 socket.on("connect", () => {
@@ -19,6 +41,13 @@ socket.on("connect", () => {
 });
 socket.on("agent-portal-state", render);
 document.querySelector("#viewer-close").addEventListener("click", closeViewer);
+document
+  .querySelector("#requisition-confirm-cancel")
+  .addEventListener("click", () => requisitionDialog.close());
+requisitionConfirmSubmit.addEventListener("click", () =>
+  void submitRequisition(),
+);
+ptoForm.addEventListener("submit", (event) => void submitPtoRequest(event));
 for (const button of document.querySelectorAll(".portal-tabs button")) {
   button.addEventListener("click", () => selectTab(button.dataset.tab));
 }
@@ -75,6 +104,8 @@ function render(state) {
   probationWarning.hidden = state.employee.status.toUpperCase() !== "PROBATION";
   missionMvpBanner.hidden = !state.employee.missionMvp;
   renderEmployeeRecord(state.employee);
+  renderRequisitions(state.employee, state.requisitions);
+  renderPtoRequests(state.ptoRequests);
   const definitions = [
     ["red", "PERSONNEL RECORDS", "AGENCY RED"],
     ["yellow", "BREAK ROOM MESSAGES", "REALITY YELLOW"],
@@ -136,9 +167,181 @@ function generateDeviceId() {
 
 function selectTab(tab) {
   document.querySelector("#files-panel").hidden = tab !== "files";
+  document.querySelector("#requisitions-panel").hidden = tab !== "requisitions";
+  document.querySelector("#pto-panel").hidden = tab !== "pto";
   document.querySelector("#record-panel").hidden = tab !== "record";
   for (const button of document.querySelectorAll(".portal-tabs button")) {
     button.classList.toggle("active", button.dataset.tab === tab);
+  }
+}
+
+function renderPtoRequests(requests = []) {
+  const history = [...requests].reverse();
+  ptoHistory.replaceChildren(
+    ...(history.length
+      ? history.map((request) => {
+          const row = document.createElement("article");
+          row.className = "pto-request";
+          const date = document.createElement("strong");
+          const status = document.createElement("span");
+          date.textContent = `${request.startDate} TO ${request.endDate}`;
+          status.textContent = "PENDING MANAGER APPROVAL";
+          row.append(date, status);
+          if (request.reason) {
+            const reason = document.createElement("p");
+            reason.textContent = request.reason;
+            row.append(reason);
+          }
+          return row;
+        })
+      : [createEmptyPtoHistory()]),
+  );
+}
+
+function createEmptyPtoHistory() {
+  const empty = document.createElement("p");
+  empty.className = "empty";
+  empty.textContent = "NO PTO REQUESTS SUBMITTED";
+  return empty;
+}
+
+async function submitPtoRequest(event) {
+  event.preventDefault();
+  const form = new FormData(ptoForm);
+  const submit = ptoForm.querySelector('button[type="submit"]');
+  submit.disabled = true;
+  ptoStatus.textContent = "FORWARDING REQUEST…";
+  try {
+    const response = await fetch(`/api/agent/${encodeURIComponent(employeeId)}/pto`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        startDate: form.get("startDate"),
+        endDate: form.get("endDate"),
+        reason: form.get("reason"),
+      }),
+    });
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.error ?? "PTO request failed.");
+    ptoForm.reset();
+    ptoStatus.textContent = "THIS REQUEST HAS BEEN FORWARDED TO YOUR MANAGER FOR APPROVAL.";
+    await refresh();
+  } catch (error) {
+    ptoStatus.textContent = `REQUEST NOT FORWARDED // ${error.message}`;
+  } finally {
+    submit.disabled = false;
+  }
+}
+
+function renderRequisitions(employee, requisitions = { catalog: [], history: [] }) {
+  requisitionList.replaceChildren(
+    ...requisitions.catalog.map((item) => {
+      const card = document.createElement("button");
+      card.type = "button";
+      card.className = "requisition-item";
+      const visual = createRequisitionVisual(item);
+      const name = document.createElement("strong");
+      const cost = document.createElement("small");
+      name.textContent = item.name;
+      cost.textContent = `${item.cost} COMMENDATION${item.cost === 1 ? "" : "S"}`;
+      card.append(visual, name, cost);
+      card.addEventListener("click", () => openRequisition(item, employee.commendations));
+      return card;
+    }),
+  );
+  const history = [...requisitions.history].reverse();
+  requisitionHistory.replaceChildren(
+    ...(history.length
+      ? history.map((entry) => {
+          const row = document.createElement("p");
+          const submitted = new Date(entry.requestedAt).toLocaleString();
+          row.textContent = `${entry.name} // ${entry.cost} COMMENDATION${entry.cost === 1 ? "" : "S"} // SUBMITTED ${submitted}`;
+          return row;
+        })
+      : [createEmptyRequisitionHistory()]),
+  );
+}
+
+function createRequisitionVisual(item) {
+  if (item.imageAsset) {
+    const image = document.createElement("img");
+    image.className = "requisition-visual requisition-photo";
+    image.src = `/requisition-media/${encodeURIComponent(item.imageAsset)}`;
+    image.alt = item.name;
+    image.addEventListener("error", () => {
+      image.replaceWith(
+        createRequisitionVisual({ ...item, imageAsset: undefined }),
+      );
+    });
+    return image;
+  }
+  const visual = document.createElement("span");
+  visual.className = "requisition-visual";
+  visual.textContent = requisitionVisual(item.id);
+  visual.setAttribute("aria-hidden", "true");
+  return visual;
+}
+
+function requisitionVisual(itemId) {
+  if (itemId.includes("mug")) return "☕";
+  if (itemId.includes("paperclip")) return "📎";
+  if (itemId.includes("locker")) return "🗄";
+  if (itemId.includes("meal")) return "△";
+  if (itemId.includes("donation")) return "♥";
+  if (itemId.includes("car-service")) return "🚗";
+  if (itemId.includes("disclosure")) return "◉";
+  if (itemId.includes("jacket")) return "⌁";
+  if (itemId.includes("gift-card")) return "▣";
+  if (itemId.includes("transfer")) return "⇄";
+  if (itemId.includes("history")) return "↺";
+  return "✈";
+}
+
+function openRequisition(item, commendations) {
+  selectedRequisition = item;
+  const affordable = item.cost <= commendations;
+  requisitionConfirmVisual.textContent = requisitionVisual(item.id);
+  requisitionConfirmName.textContent = item.name;
+  requisitionConfirmDescription.textContent = item.description;
+  requisitionConfirmCost.textContent = `${item.cost} COMMENDATION${item.cost === 1 ? "" : "S"} // AVAILABLE BALANCE: ${commendations}`;
+  requisitionConfirmMessage.textContent = affordable
+    ? "Confirming will spend your commendations and forward this requisition to Agency Procurement."
+    : "You do not currently have enough commendations for this requisition.";
+  requisitionConfirmSubmit.disabled = !affordable;
+  requisitionConfirmSubmit.textContent = affordable
+    ? "CONFIRM REQUISITION"
+    : "INSUFFICIENT COMMENDATIONS";
+  requisitionDialog.showModal();
+}
+
+function createEmptyRequisitionHistory() {
+  const empty = document.createElement("p");
+  empty.className = "empty";
+  empty.textContent = "NO REQUISITIONS SUBMITTED";
+  return empty;
+}
+
+async function submitRequisition() {
+  if (!selectedRequisition) return;
+  requisitionConfirmSubmit.disabled = true;
+  requisitionConfirmMessage.textContent = "SUBMITTING REQUISITION…";
+  try {
+    const response = await fetch(
+      `/api/agent/${encodeURIComponent(employeeId)}/requisitions`,
+      {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ itemId: selectedRequisition.id }),
+      },
+    );
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.error ?? "Requisition failed.");
+    requisitionStatus.textContent = `${selectedRequisition.name.toUpperCase()} // REQUISITION SUBMITTED`;
+    requisitionDialog.close();
+    await refresh();
+  } catch (error) {
+    requisitionConfirmMessage.textContent = `REQUISITION DECLINED // ${error.message}`;
+    requisitionConfirmSubmit.disabled = false;
   }
 }
 

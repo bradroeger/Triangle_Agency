@@ -17,3 +17,4 @@ data/campaign-events.jsonl
 data/device-access-log.jsonl
 backups/
 exports/
+.vscode/c_cpp_properties.json

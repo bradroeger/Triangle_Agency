@@ -53,7 +53,8 @@ This creates `data/assets/Playwall` and `data/playwall-content.json`. All of the
 
 | Variable  | Default | Purpose                                         |
 | --------- | ------- | ----------------------------------------------- |
-| `PORT`    | `3000`  | Local HTTP port.                                |
-| `NO_OPEN` | unset   | Set to `1` to prevent automatic browser launch. |
+| `PORT`      | `3000`                    | Local HTTP port.                                |
+| `NO_OPEN`   | unset                     | Set to `1` to prevent automatic browser launch. |
+| `ESP32_URL` | `http://192.168.50.91`    | Base URL of the ESP32 light controller.         |
 
 The server listens on the PC's network interfaces to support employee phone portals. Use only a trusted private network, and see [DEPLOYMENT.md](DEPLOYMENT.md) before allowing another device to connect.

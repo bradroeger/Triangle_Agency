@@ -154,6 +154,239 @@ main {
   border: 5px solid #17110f;
   box-shadow: 8px 8px 0 var(--red);
 }
+.requisitions {
+  background: #fff9eb;
+  border: 5px solid #17110f;
+  box-shadow: 8px 8px 0 var(--red);
+}
+.pto {
+  background: #fff9eb;
+  border: 5px solid #17110f;
+  box-shadow: 8px 8px 0 var(--red);
+}
+.pto-form {
+  display: grid;
+  gap: 0.9rem;
+  padding: 1rem;
+}
+.pto-form label {
+  display: grid;
+  gap: 0.35rem;
+  color: #7f1417;
+  font: 700 0.66rem "Courier New", monospace;
+  letter-spacing: 0.06em;
+}
+.pto-form input,
+.pto-form textarea {
+  width: 100%;
+  padding: 0.6rem;
+  color: #17110f;
+  background: #fffdf6;
+  border: 2px solid #17110f;
+  font: 0.9rem "Courier New", monospace;
+}
+.pto-form button {
+  justify-self: start;
+  padding: 0.7rem;
+  color: white;
+  background: var(--red);
+  border: 2px solid #17110f;
+  font-weight: 900;
+}
+.pto-form button:disabled {
+  color: #766d63;
+  background: #d7c8b3;
+}
+.pto-status {
+  min-height: 1.3em;
+  margin: 0 1rem 1rem;
+  color: #7f1417;
+  font: 700 0.72rem "Courier New", monospace;
+  line-height: 1.45;
+}
+.pto-history {
+  padding: 1rem;
+  border-top: 4px solid #17110f;
+  background: #e6dac7;
+}
+.pto-history h3 {
+  margin: 0 0 0.65rem;
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+}
+.pto-request {
+  margin: 0.6rem 0;
+  padding: 0.65rem;
+  border: 1px solid #8e8275;
+  background: #fffdf6;
+}
+.pto-request strong,
+.pto-request span {
+  display: block;
+}
+.pto-request strong {
+  font: 700 0.76rem "Courier New", monospace;
+}
+.pto-request span {
+  margin-top: 0.3rem;
+  color: #7f1417;
+  font-size: 0.61rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+}
+.pto-request p {
+  margin: 0.5rem 0 0;
+  font: 0.73rem "Courier New", monospace;
+  line-height: 1.4;
+}
+.requisition-intro,
+.requisition-status {
+  margin: 1rem;
+  font-family: "Courier New", monospace;
+  line-height: 1.45;
+}
+.requisition-status {
+  min-height: 1.3em;
+  color: #7f1417;
+  font-weight: 700;
+}
+.requisition-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.7rem;
+  padding: 1rem;
+}
+.requisition-item {
+  display: grid;
+  gap: 0.45rem;
+  min-height: 165px;
+  padding: 0.85rem;
+  color: #17110f;
+  border: 2px solid #17110f;
+  background: #fffdf6;
+  text-align: left;
+  box-shadow: 3px 3px 0 #17110f;
+}
+.requisition-item:hover,
+.requisition-item:focus-visible {
+  background: #f4dc54;
+  transform: translate(-1px, -1px);
+  box-shadow: 5px 5px 0 var(--red);
+}
+.requisition-item strong {
+  margin: 0;
+  font-size: 0.78rem;
+  line-height: 1.2;
+}
+.requisition-item small {
+  align-self: end;
+  color: #7f1417;
+  font: 700 0.58rem "Courier New", monospace;
+}
+.requisition-visual {
+  display: grid;
+  width: 58px;
+  height: 58px;
+  place-items: center;
+  color: white;
+  background: #17110f;
+  border: 3px solid var(--red);
+  font-size: 2rem;
+  line-height: 1;
+}
+.requisition-photo {
+  display: block;
+  background: transparent;
+  mix-blend-mode: multiply;
+  object-fit: cover;
+  object-position: center;
+}
+.requisition-confirm {
+  width: min(520px, calc(100vw - 2rem));
+  padding: 0;
+  color: #17110f;
+  background: #fff9eb;
+  border: 5px solid #17110f;
+  box-shadow: 8px 8px 0 var(--red);
+}
+.requisition-confirm::backdrop {
+  background: rgb(23 17 15 / 70%);
+}
+.requisition-confirm-heading {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 1rem;
+  color: white;
+  background: #17110f;
+  border-bottom: 7px solid var(--red);
+}
+.requisition-confirm-heading > span:first-child {
+  display: grid;
+  flex: 0 0 auto;
+  width: 52px;
+  height: 52px;
+  place-items: center;
+  color: #17110f;
+  background: #f4dc54;
+  border: 2px solid white;
+  font-size: 1.9rem;
+}
+.requisition-confirm-heading span:not(:first-child) {
+  font: 700 0.58rem "Courier New", monospace;
+}
+.requisition-confirm-heading h2 {
+  margin: 0.25rem 0 0;
+  font-size: 1rem;
+}
+.requisition-confirm > p {
+  margin: 1rem;
+  line-height: 1.45;
+}
+.requisition-confirm-cost,
+.requisition-confirm-message {
+  color: #7f1417;
+  font: 700 0.72rem "Courier New", monospace;
+}
+.requisition-confirm-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.6rem;
+  padding: 1rem;
+  border-top: 2px solid #17110f;
+}
+.requisition-confirm-actions button {
+  padding: 0.65rem;
+  color: white;
+  background: var(--red);
+  border: 2px solid #17110f;
+  font-size: 0.65rem;
+  font-weight: 900;
+}
+.requisition-confirm-actions button:first-child {
+  color: #17110f;
+  background: #d7c8b3;
+}
+.requisition-confirm-actions button:disabled {
+  color: #766d63;
+  background: #d7c8b3;
+  cursor: not-allowed;
+}
+.requisition-history {
+  border-top: 4px solid #17110f;
+  padding: 1rem;
+  background: #e6dac7;
+}
+.requisition-history h3 {
+  margin: 0 0 0.65rem;
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+}
+.requisition-history p {
+  margin: 0.45rem 0;
+  font: 0.72rem "Courier New", monospace;
+  line-height: 1.4;
+}
 .record-heading {
   padding: 1rem;
   color: white;

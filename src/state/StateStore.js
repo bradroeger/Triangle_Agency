@@ -266,6 +266,14 @@ function validateState(state) {
         `Campaign state field "employees.${employeeId}.demerits" must be a non-negative integer.`,
       );
     }
+    if (
+      override.commendations !== undefined &&
+      (!Number.isInteger(override.commendations) || override.commendations < 0)
+    ) {
+      throw new Error(
+        `Campaign state field "employees.${employeeId}.commendations" must be a non-negative integer.`,
+      );
+    }
     for (const field of ["approvedDeviceId", "approvedDeviceLabel"]) {
       if (
         override[field] !== undefined &&
@@ -320,6 +328,58 @@ function validateState(state) {
         throw new Error(
           `Campaign state employee ${employeeId} has a reminder longer than 240 characters.`,
         );
+      }
+    }
+    if (override.requisitions !== undefined) {
+      if (!Array.isArray(override.requisitions)) {
+        throw new Error(
+          `Campaign state field "employees.${employeeId}.requisitions" must be an array.`,
+        );
+      }
+      for (const requisition of override.requisitions) {
+        requireObject(`employees.${employeeId}.requisitions entry`, requisition);
+        for (const field of ["id", "itemId", "name", "requestedAt"]) {
+          if (
+            typeof requisition[field] !== "string" ||
+            !requisition[field].trim()
+          ) {
+            throw new Error(
+              `Campaign state requisition field "${field}" for ${employeeId} must be a non-empty string.`,
+            );
+          }
+        }
+        if (!Number.isInteger(requisition.cost) || requisition.cost < 1) {
+          throw new Error(
+            `Campaign state requisition cost for ${employeeId} must be a positive integer.`,
+          );
+        }
+      }
+    }
+    if (override.ptoRequests !== undefined) {
+      if (!Array.isArray(override.ptoRequests)) {
+        throw new Error(
+          `Campaign state field "employees.${employeeId}.ptoRequests" must be an array.`,
+        );
+      }
+      for (const request of override.ptoRequests) {
+        requireObject(`employees.${employeeId}.ptoRequests entry`, request);
+        for (const field of ["id", "startDate", "endDate", "requestedAt"]) {
+          if (typeof request[field] !== "string" || !request[field].trim()) {
+            throw new Error(
+              `Campaign state PTO request field "${field}" for ${employeeId} must be a non-empty string.`,
+            );
+          }
+        }
+        if (request.status !== "PENDING_MANAGER_APPROVAL") {
+          throw new Error(
+            `Campaign state PTO request status for ${employeeId} is invalid.`,
+          );
+        }
+        if (request.reason !== undefined && typeof request.reason !== "string") {
+          throw new Error(
+            `Campaign state PTO request reason for ${employeeId} must be a string.`,
+          );
+        }
       }
     }
   }

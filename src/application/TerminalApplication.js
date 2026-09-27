@@ -5,6 +5,7 @@ import {
 } from "../access/evaluateAccess.js";
 import { mergeEmployee, mergeResource } from "../state/effectiveRecords.js";
 import { buildEmployeeNumber } from "../employees/employeeIdentifiers.js";
+import { getRequisitionItem, listRequisitionItems } from "../requisitions/catalog.js";
 
 export class TerminalApplication {
   #employeeRegistry;
@@ -230,6 +231,96 @@ export class TerminalApplication {
     return employee.demerits + 1;
   }
 
+  listRequisitionItems() {
+    return listRequisitionItems();
+  }
+
+  listEmployeeRequisitions(employeeId) {
+    this.#requireEmployee(employeeId);
+    return [
+      ...(this.#stateStore.getEmployeeOverride(employeeId).requisitions ?? []),
+    ];
+  }
+
+  async requestEmployeeRequisition(employeeId, itemId) {
+    this.#requireEmployee(employeeId);
+    const item = getRequisitionItem(itemId);
+    if (!item) throw new Error("That requisition is not available.");
+    const staticEmployee = this.#employeeRegistry
+      .list()
+      .find(({ employee }) => employee.employeeId === employeeId)?.employee;
+    let requisition;
+    await this.#stateStore.mutate((draft) => {
+      const override = draft.employees[employeeId] ?? {};
+      const commendations = override.commendations ?? staticEmployee.commendations;
+      if (commendations < item.cost) {
+        throw new Error("Insufficient commendations for this requisition.");
+      }
+      requisition = {
+        id: randomUUID(),
+        itemId: item.id,
+        name: item.name,
+        cost: item.cost,
+        requestedAt: new Date().toISOString(),
+      };
+      draft.employees[employeeId] = {
+        ...override,
+        commendations: commendations - item.cost,
+        requisitions: [...(override.requisitions ?? []), requisition],
+      };
+    });
+    await this.#campaignLogger
+      .append({
+        event: "EMPLOYEE_REQUISITION",
+        employeeId,
+        itemId: item.id,
+        cost: item.cost,
+      })
+      .catch(this.#onWarning);
+    return requisition;
+  }
+
+  listEmployeePtoRequests(employeeId) {
+    this.#requireEmployee(employeeId);
+    return [
+      ...(this.#stateStore.getEmployeeOverride(employeeId).ptoRequests ?? []),
+    ];
+  }
+
+  async requestEmployeePto(employeeId, { startDate, endDate, reason }) {
+    this.#requireEmployee(employeeId);
+    if (!isDateOnly(startDate) || !isDateOnly(endDate) || startDate > endDate) {
+      throw new Error("Enter a valid start and end date for your time off.");
+    }
+    if (reason !== undefined && (typeof reason !== "string" || reason.length > 500)) {
+      throw new Error("Your PTO note must be 500 characters or fewer.");
+    }
+    const request = {
+      id: randomUUID(),
+      startDate,
+      endDate,
+      reason: reason?.trim() ?? "",
+      requestedAt: new Date().toISOString(),
+      status: "PENDING_MANAGER_APPROVAL",
+    };
+    await this.#stateStore.mutate((draft) => {
+      const override = draft.employees[employeeId] ?? {};
+      draft.employees[employeeId] = {
+        ...override,
+        ptoRequests: [...(override.ptoRequests ?? []), request],
+      };
+    });
+    await this.#campaignLogger
+      .append({
+        event: "EMPLOYEE_PTO_REQUEST",
+        employeeId,
+        startDate,
+        endDate,
+      })
+      .catch(this.#onWarning);
+    return request;
+  }
+
   async markEmployeePlaywallSeen(employeeId, contentId) {
     if (!this.#employeeCanAccessPlaywall(employeeId, contentId)) {
       throw new Error(
@@ -329,6 +420,14 @@ export class TerminalApplication {
       if (typeof command.enabled !== "boolean")
         throw new Error("Mission MVP enabled value must be boolean.");
       await this.#stateStore.setMissionMvp(command.employeeId, command.enabled);
+    } else if (type === "ADD_EMPLOYEE_COMMENDATION") {
+      const employee = this.getEffectiveEmployeeById(command.employeeId);
+      if (!employee) throw new Error(`Unknown employee: ${command.employeeId}`);
+      await this.#stateStore.applyEmployeeOverride(command.employeeId, {
+        commendations: employee.commendations + 1,
+      });
+    } else if (type === "ADD_EMPLOYEE_DEMERIT") {
+      await this.addEmployeeDemerit(command.employeeId);
     } else if (type === "ADD_EMPLOYEE_PERMISSION") {
       await this.#changePermission(command, true);
     } else if (type === "REMOVE_EMPLOYEE_PERMISSION") {
@@ -697,4 +796,12 @@ function requireClearance(value) {
   if (!Number.isInteger(value) || value < 0 || value > 9) {
     throw new Error("Clearance must be an integer from 0 to 9.");
   }
+}
+
+function isDateOnly(value) {
+  if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    return false;
+  }
+  const date = new Date(`${value}T00:00:00Z`);
+  return !Number.isNaN(date) && date.toISOString().slice(0, 10) === value;
 }
