@@ -38,6 +38,16 @@ const agentPortalQr = document.querySelector("#agent-portal-qr");
 const ANOMALY_SEQUENCE_DURATION_MS = 46100;
 const ANOMALY_BOOT_LIGHTS_START_MS = 12700;
 const AGENCY_BOOT_SCREEN_START_MS = 44400;
+const RECOVERY_TERMINAL_POSITIONS = [
+  { x: 50, y: 50 },
+  { x: 18, y: 22 },
+  { x: 82, y: 20 },
+  { x: 16, y: 78 },
+  { x: 84, y: 80 },
+  { x: 50, y: 12 },
+  { x: 32, y: 88 },
+  { x: 70, y: 54 },
+];
 let anomalyTimers = [];
 let matrixAnimationFrame;
 let matrixDrops = [];
@@ -796,10 +806,10 @@ function buildErrorStorm() {
   for (const [index, [title, message, kind]] of messages.entries()) {
     const windowElement = document.createElement("div");
     windowElement.className = `xp-window xp-${kind}`;
-    windowElement.style.setProperty("--x", `${randomBetween(-8, 82)}%`);
-    windowElement.style.setProperty("--y", `${randomBetween(-6, 84)}%`);
-    windowElement.style.setProperty("--w", `${randomBetween(230, 680)}px`);
-    windowElement.style.setProperty("--body-h", `${randomBetween(78, 210)}px`);
+    windowElement.style.setProperty("--x", `${randomBetween(-5, 70)}%`);
+    windowElement.style.setProperty("--y", `${randomBetween(-4, 78)}%`);
+    windowElement.style.setProperty("--w", `${randomBetween(320, 850)}px`);
+    windowElement.style.setProperty("--body-h", `${randomBetween(100, 250)}px`);
     windowElement.style.setProperty("--z", String(index + 1));
     windowElement.style.setProperty("--r", `${randomBetween(-2, 2)}deg`);
     windowElement.style.setProperty(
@@ -883,17 +893,21 @@ function createRecoveryTerminal(message, showProgress = false) {
   const terminal = document.createElement("section");
   terminal.className = "agency-terminal";
   const terminalIndex = recoveryTerminals.childElementCount;
+  const position = RECOVERY_TERMINAL_POSITIONS[
+    terminalIndex % RECOVERY_TERMINAL_POSITIONS.length
+  ];
+  const terminalX = window.innerWidth <= 900 ? 50 : position.x;
   terminal.style.setProperty(
     "--terminal-x",
-    `${terminalIndex === 0 ? 50 : randomBetween(34, 66)}%`,
+    `${terminalX + randomBetween(-4, 4)}%`,
   );
   terminal.style.setProperty(
     "--terminal-y",
-    `${terminalIndex === 0 ? 50 : randomBetween(30, 70)}%`,
+    `${position.y + randomBetween(-4, 4)}%`,
   );
   terminal.style.setProperty(
     "--terminal-w",
-    `${terminalIndex === 0 ? 940 : randomBetween(680, 1040)}px`,
+    `${terminalIndex === 0 ? 1100 : randomBetween(820, 1200)}px`,
   );
   terminal.style.setProperty("--terminal-z", String(terminalIndex + 1));
   terminal.style.setProperty("--terminal-drift-x", `${randomBetween(-9, 9)}px`);
