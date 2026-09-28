@@ -569,7 +569,7 @@ button.enabled {
   z-index: var(--z);
   left: var(--x);
   top: var(--y);
-  width: min(var(--w), 82vw);
+  width: min(var(--w), 90vw);
   padding: 3px;
   color: #000;
   background: #c0c0c0;
@@ -953,8 +953,8 @@ button.enabled {
 }
 .recovery-terminals {
   position: relative;
-  width: min(1180px, 98vw);
-  height: min(760px, 88vh);
+  width: min(1600px, 100vw);
+  height: min(900px, 96vh);
 }
 .agency-terminal {
   position: absolute;
