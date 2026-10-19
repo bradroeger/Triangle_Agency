@@ -36,6 +36,50 @@ test("loads valid state and returns safe copies", async () => {
   }
 });
 
+test("persists independent agent progress and rejects invalid positions", async () => {
+  const area = await workspace();
+  try {
+    const store = await StateStore.load(area.file);
+    await store.applyEmployeeOverride("TA-1", {
+      progress: { competency: 3, reality: 1, anomaly: 0 },
+    });
+    await store.applyEmployeeOverride("TA-2", {
+      progress: { competency: 0, reality: 4, anomaly: 2 },
+    });
+    const reloaded = await StateStore.load(area.file);
+    assert.deepEqual(reloaded.getEmployeeOverride("TA-1").progress, {
+      competency: 3,
+      reality: 1,
+      anomaly: 0,
+    });
+    assert.deepEqual(reloaded.getEmployeeOverride("TA-2").progress, {
+      competency: 0,
+      reality: 4,
+      anomaly: 2,
+    });
+    await assert.rejects(
+      reloaded.applyEmployeeOverride("TA-1", {
+        progress: { competency: 31 },
+      }),
+      /integer from 0 to 30/,
+    );
+    await assert.rejects(
+      reloaded.applyEmployeeOverride("TA-1", {
+        progress: { competency: 11, reality: 10, anomaly: 10 },
+      }),
+      /more than 30 total progression marks/,
+    );
+    await assert.rejects(
+      reloaded.applyEmployeeOverride("TA-1", {
+        progress: { inventedTrack: 1 },
+      }),
+      /not a supported track/,
+    );
+  } finally {
+    await rm(area.directory, { recursive: true });
+  }
+});
+
 test("rejects corrupt JSON and unsupported versions without overwriting", async () => {
   const area = await workspace();
   try {
@@ -92,6 +136,7 @@ test("persists flags, overrides, unlocked content, and trigger history atomicall
           status: "PENDING_MANAGER_APPROVAL",
         },
       ],
+      progress: { competency: 2, reality: 0, anomaly: 1 },
     });
     await store.applyResourceOverride("archive", { enabled: false });
     await store.setMissionMvp("TA-1", true);
@@ -122,6 +167,11 @@ test("persists flags, overrides, unlocked content, and trigger history atomicall
       reloaded.getEmployeeOverride("TA-1").ptoRequests[0].status,
       "PENDING_MANAGER_APPROVAL",
     );
+    assert.deepEqual(reloaded.getEmployeeOverride("TA-1").progress, {
+      competency: 2,
+      reality: 0,
+      anomaly: 1,
+    });
     assert.equal(reloaded.getEmployeeOverride("TA-1").missionMvp, undefined);
     assert.equal(reloaded.getEmployeeOverride("TA-2").missionMvp, true);
     assert.equal(reloaded.getResourceOverride("archive").enabled, false);

@@ -133,6 +133,7 @@ main {
 }
 .portal-tabs {
   display: flex;
+  flex-wrap: wrap;
   gap: 0.35rem;
   margin-top: 1.4rem;
   border-bottom: 5px solid #17110f;
@@ -154,6 +155,184 @@ main {
   border: 5px solid #17110f;
   box-shadow: 8px 8px 0 var(--red);
 }
+.progress-panel {
+  padding: 1rem;
+  background: #fff9eb;
+  border: 5px solid #17110f;
+  box-shadow: 8px 8px 0 var(--red);
+}
+.progress-note {
+  margin: 0.8rem 0 1.2rem;
+  color: #55483d;
+  font:
+    0.75rem/1.45 "Courier New",
+    monospace;
+}
+.progress-track {
+  --track-colour: var(--red);
+  --track-tint: #fbe8e9;
+  margin: 1rem 0;
+  padding: 0.85rem;
+  border: 2px solid #17110f;
+  background: #fffdf6;
+}
+.progress-track.reality {
+  --track-colour: #f0ad16;
+  --track-tint: #fff8e7;
+}
+.progress-track.anomaly {
+  --track-colour: #0754c8;
+  --track-tint: #eaf1fd;
+}
+.progress-track h3 {
+  margin: 0;
+  color: var(--track-colour);
+  font-size: 1rem;
+  text-transform: uppercase;
+}
+.progress-summary {
+  min-height: 1.2em;
+  margin: 0.35rem 0 0.65rem;
+  font:
+    700 0.75rem "Courier New",
+    monospace;
+}
+.track-ranks {
+  margin: 0.45rem 0 0.65rem;
+  color: #716778;
+  font:
+    700 0.58rem/1.35 Arial,
+    sans-serif;
+  text-transform: uppercase;
+}
+.progress-steps {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(15, minmax(0, 1fr));
+  gap: 0.28rem 0.3rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.progress-steps li {
+  position: relative;
+  display: grid;
+  min-width: 0;
+  aspect-ratio: 1;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--track-colour) 35%, white);
+  border-radius: 0.38rem;
+  color: color-mix(in srgb, var(--track-colour) 65%, white);
+  background: var(--track-tint);
+  font:
+    700 clamp(0.45rem, 1.25vw, 0.85rem) "Courier New",
+    monospace;
+}
+.progress-position {
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  color: inherit;
+  background: transparent;
+  border: 0;
+  border-radius: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+.progress-position:disabled {
+  cursor: not-allowed;
+}
+.progress-steps li:not(.row-end):not(.reverse)::after,
+.progress-steps li.reverse:not(.row-end)::after {
+  position: absolute;
+  top: 50%;
+  width: 0.3rem;
+  height: 0.18rem;
+  content: "";
+  background: var(--track-colour);
+  transform: translateY(-50%);
+}
+.progress-steps li:not(.reverse)::after {
+  right: -0.3rem;
+}
+.progress-steps li.reverse::after {
+  left: -0.3rem;
+}
+.progress-steps li.row-end:not(.reverse)::after,
+.progress-steps li.row-end.reverse::after {
+  top: 50%;
+  width: 0.22rem;
+  height: calc(100% + 0.58rem);
+  background: transparent;
+  border: 3px solid var(--track-colour);
+  border-left: 0;
+  border-radius: 0 0.45rem 0.45rem 0;
+  transform: translateY(-50%);
+}
+.progress-steps li.row-end.reverse::after {
+  right: auto;
+  left: -0.32rem;
+  border-right: 0;
+  border-left: 3px solid var(--track-colour);
+  border-radius: 0.45rem 0 0 0.45rem;
+}
+.progress-steps .complete {
+  color: #17110f;
+  background: var(--track-tint);
+  border: 2px solid var(--track-colour);
+  box-shadow: inset 0 0 0 2px white;
+}
+.progress-steps .complete::before {
+  position: absolute;
+  top: -0.35rem;
+  right: -0.22rem;
+  width: 0.85rem;
+  height: 0.85rem;
+  border-radius: 50%;
+  color: white;
+  background: var(--track-colour);
+  content: "✓";
+  font:
+    700 0.62rem/0.85rem Arial,
+    sans-serif;
+  text-align: center;
+}
+.progress-steps .complete {
+  z-index: 1;
+}
+.progress-steps .current {
+  outline: 3px solid #17110f;
+  outline-offset: 1px;
+  font-weight: 900;
+}
+.progress-steps .remaining {
+  color: #55483d;
+  background: #e6dac7;
+}
+.progress-steps .unavailable {
+  color: #766d63;
+  background: repeating-linear-gradient(135deg, #ebe5dc 0 4px, #c9beb1 4px 6px);
+  text-decoration: line-through;
+  text-decoration-thickness: 2px;
+}
+.progress-actions {
+  display: flex;
+  gap: 0.55rem;
+  margin-top: 0.8rem;
+}
+.progress-actions button {
+  min-height: 2.75rem;
+  flex: 1;
+  padding: 0.55rem;
+  color: white;
+  background: #17110f;
+  border: 2px solid #17110f;
+  font-weight: 900;
+}
+.progress-actions button:disabled {
+  color: #766d63;
+  background: #d7c8b3;
+}
 .requisitions {
   background: #fff9eb;
   border: 5px solid #17110f;
@@ -173,7 +352,9 @@ main {
   display: grid;
   gap: 0.35rem;
   color: #7f1417;
-  font: 700 0.66rem "Courier New", monospace;
+  font:
+    700 0.66rem "Courier New",
+    monospace;
   letter-spacing: 0.06em;
 }
 .pto-form input,
@@ -183,7 +364,9 @@ main {
   color: #17110f;
   background: #fffdf6;
   border: 2px solid #17110f;
-  font: 0.9rem "Courier New", monospace;
+  font:
+    0.9rem "Courier New",
+    monospace;
 }
 .pto-form button {
   justify-self: start;
@@ -201,7 +384,9 @@ main {
   min-height: 1.3em;
   margin: 0 1rem 1rem;
   color: #7f1417;
-  font: 700 0.72rem "Courier New", monospace;
+  font:
+    700 0.72rem "Courier New",
+    monospace;
   line-height: 1.45;
 }
 .pto-history {
@@ -225,7 +410,9 @@ main {
   display: block;
 }
 .pto-request strong {
-  font: 700 0.76rem "Courier New", monospace;
+  font:
+    700 0.76rem "Courier New",
+    monospace;
 }
 .pto-request span {
   margin-top: 0.3rem;
@@ -236,7 +423,9 @@ main {
 }
 .pto-request p {
   margin: 0.5rem 0 0;
-  font: 0.73rem "Courier New", monospace;
+  font:
+    0.73rem "Courier New",
+    monospace;
   line-height: 1.4;
 }
 .requisition-intro,
@@ -281,7 +470,9 @@ main {
 .requisition-item small {
   align-self: end;
   color: #7f1417;
-  font: 700 0.58rem "Courier New", monospace;
+  font:
+    700 0.58rem "Courier New",
+    monospace;
 }
 .requisition-visual {
   display: grid;
@@ -333,7 +524,9 @@ main {
   font-size: 1.9rem;
 }
 .requisition-confirm-heading span:not(:first-child) {
-  font: 700 0.58rem "Courier New", monospace;
+  font:
+    700 0.58rem "Courier New",
+    monospace;
 }
 .requisition-confirm-heading h2 {
   margin: 0.25rem 0 0;
@@ -346,7 +539,9 @@ main {
 .requisition-confirm-cost,
 .requisition-confirm-message {
   color: #7f1417;
-  font: 700 0.72rem "Courier New", monospace;
+  font:
+    700 0.72rem "Courier New",
+    monospace;
 }
 .requisition-confirm-actions {
   display: flex;
@@ -384,7 +579,9 @@ main {
 }
 .requisition-history p {
   margin: 0.45rem 0;
-  font: 0.72rem "Courier New", monospace;
+  font:
+    0.72rem "Courier New",
+    monospace;
   line-height: 1.4;
 }
 .record-heading {
@@ -652,15 +849,29 @@ footer {
   font-size: 0.58rem;
   letter-spacing: 0.12em;
 }
-@media (max-width: 520px) {
+@media (max-width: 600px) {
   .employment-metrics,
   #employee-record-fields {
     grid-template-columns: 1fr;
   }
   .portal-tabs button {
-    flex: 1;
+    flex: 1 1 calc(50% - 0.25rem);
+    min-height: 2.75rem;
     padding-inline: 0.35rem;
     font-size: 0.68rem;
+  }
+  .progress-panel {
+    padding: 0.7rem;
+  }
+  .progress-steps {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 0.38rem 0.35rem;
+  }
+  .progress-steps li {
+    font-size: 0.66rem;
+  }
+  .track-ranks {
+    font-size: 0.52rem;
   }
   .viewer {
     padding: 0;

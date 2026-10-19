@@ -18,7 +18,7 @@ try {
 } catch (error) {
   console.error(`Simulation failed: ${error.message}`);
   console.error(
-    "Start the terminal first, then run: npm run simulate -- 04A7812C966180",
+    "Start the terminal first, then run: npm run simulate -- 537220B7960001",
   );
   process.exitCode = 1;
 }

@@ -378,7 +378,7 @@ Restart the application after editing this file. Empty messages or malformed JSO
 
 The office portal also has an **ENABLE DEBUG MODE** control. It uses the same local simulator as the main terminal: enter a fake UID, choose **PRESENT CARD**, then **REMOVE CARD** to exercise the normal reset. Debug scans use the real employee and GM-message lookup path and are marked simulated in the application logs.
 
-Use `04A7812C966180` to test Pendleton’s specific message. Use `A1B2C3D4` to test the weighted fallback pools; Mercer intentionally has no specific message entry.
+Use `537220B7960001` to test Pendleton’s specific message. Use `A1B2C3D4` to test the weighted fallback pools; Mercer intentionally has no specific message entry.
 
 ## Agent phone portals
 
@@ -408,14 +408,14 @@ The application never replaces a damaged state file automatically.
 
 ## Test without hardware
 
-The browser includes an **ENABLE TEST MODE** control. It exposes a clearly labelled simulated reader panel where you can enter a fake UID, present the card, and remove it. Use `04A7812C966180` for the placeholder known employee and `FFFFFFFF` for an unknown credential. Use **REMOVE CARD** to exercise the same delayed reset behavior as physical badge removal. Test-mode events are marked as simulated and do not access PC/SC hardware.
+The browser includes an **ENABLE TEST MODE** control. It exposes a clearly labelled simulated reader panel where you can enter a fake UID, present the card, and remove it. Use `537220B7960001` for the placeholder known employee and `FFFFFFFF` for an unknown credential. Use **REMOVE CARD** to exercise the same delayed reset behavior as physical badge removal. Test-mode events are marked as simulated and do not access PC/SC hardware.
 
-For a granted attempt, select **Evidence Archive** and present `04A7812C966180`. For a denied attempt, select **Containment Floor** and present the same badge: its placeholder clearance is level 2 while the resource requires level 3. Clear the destination to exercise identification without an access decision.
+For a granted attempt, select **Evidence Archive** and present `537220B7960001`. For a denied attempt, select **Containment Floor** and present the same badge: its placeholder clearance is level 2 while the resource requires level 3. Clear the destination to exercise identification without an access decision.
 
 Keep the application running and open a second PowerShell window:
 
 ```powershell
-npm run simulate -- 04A7812C966180
+npm run simulate -- 537220B7960001
 ```
 
 That command tests the placeholder known employee. To test an unknown credential:
@@ -427,7 +427,7 @@ npm run simulate -- FFFFFFFF
 To select a resource and evaluate the simulated scan in one command:
 
 ```powershell
-npm run simulate -- 04A7812C966180 evidence-archive
+npm run simulate -- 537220B7960001 evidence-archive
 ```
 
 An unknown resource ID returns a clear error and does not scan the badge.

@@ -214,10 +214,33 @@ app.get("/api/agent/:employeeId/content/:contentId", (request, response) => {
   return response.sendFile(path.resolve(asset.filePath));
 });
 
+app.post("/api/agent/:employeeId/progress", async (request, response) => {
+  const employeeId = request.params.employeeId;
+  if (!activeAgents.has(employeeId)) {
+    return response
+      .status(403)
+      .json({ ok: false, error: "Employee portal is locked." });
+  }
+  try {
+    const progress = await terminalApplication.setEmployeeProgress(
+      employeeId,
+      request.body?.track,
+      request.body?.position,
+    );
+    broadcastAgentPortal(employeeId);
+    broadcastSupervisorState();
+    return response.json({ ok: true, progress });
+  } catch (error) {
+    return response.status(400).json({ ok: false, error: error.message });
+  }
+});
+
 app.post("/api/agent/:employeeId/requisitions", async (request, response) => {
   const employeeId = request.params.employeeId;
   if (!activeAgents.has(employeeId)) {
-    return response.status(403).json({ ok: false, error: "Employee portal is locked." });
+    return response
+      .status(403)
+      .json({ ok: false, error: "Employee portal is locked." });
   }
   try {
     const requisition = await terminalApplication.requestEmployeeRequisition(
@@ -235,7 +258,9 @@ app.post("/api/agent/:employeeId/requisitions", async (request, response) => {
 app.post("/api/agent/:employeeId/pto", async (request, response) => {
   const employeeId = request.params.employeeId;
   if (!activeAgents.has(employeeId)) {
-    return response.status(403).json({ ok: false, error: "Employee portal is locked." });
+    return response
+      .status(403)
+      .json({ ok: false, error: "Employee portal is locked." });
   }
   try {
     const ptoRequest = await terminalApplication.requestEmployeePto(
@@ -1185,6 +1210,7 @@ function agentPortalSnapshot(employeeId) {
     unlocked: true,
     loggedInAt: activeAgents.get(employeeId).loggedInAt,
     employee,
+    progress: terminalApplication.getEmployeeProgress(employeeId),
     files,
     requisitions: {
       catalog: terminalApplication.listRequisitionItems(),

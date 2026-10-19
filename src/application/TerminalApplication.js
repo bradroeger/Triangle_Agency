@@ -5,7 +5,10 @@ import {
 } from "../access/evaluateAccess.js";
 import { mergeEmployee, mergeResource } from "../state/effectiveRecords.js";
 import { buildEmployeeNumber } from "../employees/employeeIdentifiers.js";
-import { getRequisitionItem, listRequisitionItems } from "../requisitions/catalog.js";
+import {
+  getRequisitionItem,
+  listRequisitionItems,
+} from "../requisitions/catalog.js";
 
 export class TerminalApplication {
   #employeeRegistry;
@@ -207,6 +210,35 @@ export class TerminalApplication {
     };
   }
 
+  getEmployeeProgress(employeeId) {
+    this.#requireEmployee(employeeId);
+    return this.#stateStore.getEmployeeOverride(employeeId).progress ?? {};
+  }
+
+  async setEmployeeProgress(employeeId, track, position) {
+    this.#requireEmployee(employeeId);
+    if (!["competency", "reality", "anomaly"].includes(track)) {
+      throw new Error("Unknown progression track.");
+    }
+    if (!Number.isInteger(position) || position < 0 || position > 30) {
+      throw new Error("Progress position must be an integer from 0 to 30.");
+    }
+    const current = this.getEmployeeProgress(employeeId);
+    const total = ["competency", "reality", "anomaly"].reduce(
+      (sum, name) => sum + (name === track ? position : (current[name] ?? 0)),
+      0,
+    );
+    if (total > 30) {
+      throw new Error(
+        "No boxes remain on this track; marks on other tracks remove its end boxes.",
+      );
+    }
+    await this.#stateStore.applyEmployeeOverride(employeeId, {
+      progress: { ...current, [track]: position },
+    });
+    return this.getEmployeeProgress(employeeId);
+  }
+
   async approveEmployeeDevice(employeeId, deviceId, label) {
     this.#requireEmployee(employeeId);
     if (
@@ -252,7 +284,8 @@ export class TerminalApplication {
     let requisition;
     await this.#stateStore.mutate((draft) => {
       const override = draft.employees[employeeId] ?? {};
-      const commendations = override.commendations ?? staticEmployee.commendations;
+      const commendations =
+        override.commendations ?? staticEmployee.commendations;
       if (commendations < item.cost) {
         throw new Error("Insufficient commendations for this requisition.");
       }
@@ -292,7 +325,10 @@ export class TerminalApplication {
     if (!isDateOnly(startDate) || !isDateOnly(endDate) || startDate > endDate) {
       throw new Error("Enter a valid start and end date for your time off.");
     }
-    if (reason !== undefined && (typeof reason !== "string" || reason.length > 500)) {
+    if (
+      reason !== undefined &&
+      (typeof reason !== "string" || reason.length > 500)
+    ) {
       throw new Error("Your PTO note must be 500 characters or fewer.");
     }
     const request = {

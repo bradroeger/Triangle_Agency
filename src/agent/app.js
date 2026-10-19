@@ -7,6 +7,7 @@ const viewer = document.querySelector("#viewer");
 const viewerBody = document.querySelector("#viewer-body");
 const probationWarning = document.querySelector("#probation-warning");
 const recordFields = document.querySelector("#employee-record-fields");
+const progressTracks = document.querySelector("#progress-tracks");
 const missionMvpBanner = document.querySelector("#mission-mvp-banner");
 const requisitionList = document.querySelector("#requisition-list");
 const requisitionHistory = document.querySelector("#requisition-history");
@@ -15,11 +16,15 @@ const requisitionDialog = document.querySelector("#requisition-confirm");
 const requisitionConfirmVisual = document.querySelector(
   "#requisition-confirm-visual",
 );
-const requisitionConfirmName = document.querySelector("#requisition-confirm-name");
+const requisitionConfirmName = document.querySelector(
+  "#requisition-confirm-name",
+);
 const requisitionConfirmDescription = document.querySelector(
   "#requisition-confirm-description",
 );
-const requisitionConfirmCost = document.querySelector("#requisition-confirm-cost");
+const requisitionConfirmCost = document.querySelector(
+  "#requisition-confirm-cost",
+);
 const requisitionConfirmMessage = document.querySelector(
   "#requisition-confirm-message",
 );
@@ -44,13 +49,15 @@ document.querySelector("#viewer-close").addEventListener("click", closeViewer);
 document
   .querySelector("#requisition-confirm-cancel")
   .addEventListener("click", () => requisitionDialog.close());
-requisitionConfirmSubmit.addEventListener("click", () =>
-  void submitRequisition(),
+requisitionConfirmSubmit.addEventListener(
+  "click",
+  () => void submitRequisition(),
 );
 ptoForm.addEventListener("submit", (event) => void submitPtoRequest(event));
 for (const button of document.querySelectorAll(".portal-tabs button")) {
   button.addEventListener("click", () => selectTab(button.dataset.tab));
 }
+selectTab("files");
 void refresh();
 void reportDevice();
 setInterval(() => void refresh(), 2000);
@@ -106,6 +113,7 @@ function render(state) {
   renderEmployeeRecord(state.employee);
   renderRequisitions(state.employee, state.requisitions);
   renderPtoRequests(state.ptoRequests);
+  renderProgress(state.progress ?? {});
   const definitions = [
     ["red", "PERSONNEL RECORDS", "AGENCY RED"],
     ["yellow", "BREAK ROOM MESSAGES", "REALITY YELLOW"],
@@ -166,12 +174,254 @@ function generateDeviceId() {
 }
 
 function selectTab(tab) {
-  document.querySelector("#files-panel").hidden = tab !== "files";
-  document.querySelector("#requisitions-panel").hidden = tab !== "requisitions";
-  document.querySelector("#pto-panel").hidden = tab !== "pto";
-  document.querySelector("#record-panel").hidden = tab !== "record";
+  for (const panel of document.querySelectorAll(".tab-panel")) {
+    panel.hidden = panel.id !== `${tab}-panel`;
+  }
   for (const button of document.querySelectorAll(".portal-tabs button")) {
     button.classList.toggle("active", button.dataset.tab === tab);
+    button.setAttribute("aria-pressed", String(button.dataset.tab === tab));
+  }
+}
+
+// The Work/Life Balance sheet shows thirty boxes on each track.
+const progressionTracks = [
+  {
+    id: "competency",
+    name: "Competency",
+    positions: 30,
+    labels: [
+      "",
+      "",
+      "A3",
+      "",
+      "",
+      "D4",
+      "",
+      "",
+      "G3",
+      "",
+      "",
+      "J3",
+      "",
+      "",
+      "N3",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "Q3",
+      "",
+      "T3",
+      "",
+      "W8",
+      "",
+      "Y2",
+      "",
+    ],
+    ranks:
+      "Trainee · Associate · Sr. Associate · Assistant Director · Director · Chair · Executive VP · Senior VP · Vice President · Regional Director",
+  },
+  {
+    id: "reality",
+    name: "Reality",
+    positions: 30,
+    labels: [
+      "C4",
+      "",
+      "L11",
+      "",
+      "",
+      "",
+      "E2",
+      "",
+      "O4",
+      "",
+      "",
+      "",
+      "T6",
+      "",
+      "",
+      "V2",
+      "",
+      "X3",
+      "",
+      "H5",
+      "",
+      "",
+      "E3",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+    ],
+  },
+  {
+    id: "anomaly",
+    name: "Anomaly",
+    positions: 30,
+    labels: [
+      "H4",
+      "H3",
+      "",
+      "U2",
+      "",
+      "X2",
+      "",
+      "",
+      "",
+      "N1",
+      "",
+      "Q2",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "L10",
+      "",
+      "G8",
+      "",
+      "",
+      "A7",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+    ],
+  },
+];
+
+const mobileTrack = matchMedia("(max-width: 600px)");
+let lastProgress = {};
+mobileTrack.addEventListener("change", () => renderProgress(lastProgress));
+
+function renderProgress(progress) {
+  lastProgress = progress;
+  const columns = mobileTrack.matches ? 5 : 15;
+  progressTracks.replaceChildren(
+    ...progressionTracks.map((track) => {
+      const current = Math.min(progress[track.id] ?? 0, track.positions);
+      const removed = progressionTracks
+        .filter((other) => other.id !== track.id)
+        .reduce((total, other) => total + (progress[other.id] ?? 0), 0);
+      const available = track.positions - removed;
+      const section = document.createElement("section");
+      section.className = `progress-track ${track.id}`;
+      const heading = document.createElement("h3");
+      heading.textContent = track.name;
+      const ranks = track.ranks ? document.createElement("p") : null;
+      if (ranks) {
+        ranks.className = "track-ranks";
+        ranks.textContent = track.ranks;
+      }
+      const summary = document.createElement("p");
+      summary.className = "progress-summary";
+      summary.textContent = `${current} marked · ${available} boxes available`;
+      if (progressTracks.dataset.error)
+        summary.textContent = progressTracks.dataset.error;
+      const steps = document.createElement("ol");
+      steps.className = "progress-steps";
+      steps.setAttribute("aria-label", `${track.name} boxes`);
+      for (let position = 1; position <= track.positions; position += 1) {
+        const item = document.createElement("li");
+        const row = Math.floor((position - 1) / columns);
+        const offset = (position - 1) % columns;
+        const reverse = row % 2 === 1;
+        item.style.gridRow = String(row + 1);
+        item.style.gridColumn = String(reverse ? columns - offset : offset + 1);
+        item.classList.toggle("reverse", reverse);
+        if (offset === columns - 1) item.classList.add("row-end");
+        const unavailable = position > track.positions - removed;
+        item.className =
+          position <= current
+            ? "complete"
+            : unavailable
+              ? "unavailable"
+              : position === current + 1
+                ? "current"
+                : "remaining";
+        const box = document.createElement("button");
+        box.type = "button";
+        box.className = "progress-position";
+        box.textContent = track.labels[position - 1] || "";
+        box.setAttribute("aria-pressed", String(position <= current));
+        box.setAttribute(
+          "aria-label",
+          `Box ${position}${position <= current ? ", marked; click to remove this and later marks" : unavailable ? ", crossed out by marks on other tracks" : ", available; click to mark through this box"}`,
+        );
+        box.disabled = unavailable;
+        box.addEventListener(
+          "click",
+          () =>
+            void updateProgress(
+              track.id,
+              position <= current ? position - 1 : position,
+            ),
+        );
+        box.title = track.labels[position - 1]
+          ? `Box ${position}: ${track.labels[position - 1]}`
+          : `Box ${position}`;
+        item.append(box);
+        steps.append(item);
+      }
+      const actions = document.createElement("div");
+      actions.className = "progress-actions";
+      const back = document.createElement("button");
+      back.type = "button";
+      back.textContent = "− Remove mark";
+      back.disabled = current === 0;
+      back.addEventListener(
+        "click",
+        () => void updateProgress(track.id, current - 1),
+      );
+      const advance = document.createElement("button");
+      advance.type = "button";
+      advance.textContent = "+ Mark box";
+      advance.disabled = current >= available;
+      advance.addEventListener(
+        "click",
+        () => void updateProgress(track.id, current + 1),
+      );
+      actions.append(back, advance);
+      section.append(heading);
+      if (ranks) section.append(ranks);
+      section.append(summary, steps, actions);
+      return section;
+    }),
+  );
+}
+
+async function updateProgress(track, position) {
+  progressTracks.querySelectorAll("button").forEach((button) => {
+    button.disabled = true;
+  });
+  try {
+    const response = await fetch(
+      `/api/agent/${encodeURIComponent(employeeId)}/progress`,
+      {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ track, position }),
+      },
+    );
+    const result = await response.json();
+    if (!response.ok)
+      throw new Error(result.error ?? "Progress could not be saved.");
+    progressTracks.dataset.saved = "true";
+    progressTracks.dataset.error = "";
+    await refresh();
+  } catch (error) {
+    progressTracks.dataset.error = error.message;
+    await refresh();
   }
 }
 
@@ -212,19 +462,23 @@ async function submitPtoRequest(event) {
   submit.disabled = true;
   ptoStatus.textContent = "FORWARDING REQUEST…";
   try {
-    const response = await fetch(`/api/agent/${encodeURIComponent(employeeId)}/pto`, {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({
-        startDate: form.get("startDate"),
-        endDate: form.get("endDate"),
-        reason: form.get("reason"),
-      }),
-    });
+    const response = await fetch(
+      `/api/agent/${encodeURIComponent(employeeId)}/pto`,
+      {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          startDate: form.get("startDate"),
+          endDate: form.get("endDate"),
+          reason: form.get("reason"),
+        }),
+      },
+    );
     const result = await response.json();
     if (!response.ok) throw new Error(result.error ?? "PTO request failed.");
     ptoForm.reset();
-    ptoStatus.textContent = "THIS REQUEST HAS BEEN FORWARDED TO YOUR MANAGER FOR APPROVAL.";
+    ptoStatus.textContent =
+      "THIS REQUEST HAS BEEN FORWARDED TO YOUR MANAGER FOR APPROVAL.";
     await refresh();
   } catch (error) {
     ptoStatus.textContent = `REQUEST NOT FORWARDED // ${error.message}`;
@@ -233,7 +487,10 @@ async function submitPtoRequest(event) {
   }
 }
 
-function renderRequisitions(employee, requisitions = { catalog: [], history: [] }) {
+function renderRequisitions(
+  employee,
+  requisitions = { catalog: [], history: [] },
+) {
   requisitionList.replaceChildren(
     ...requisitions.catalog.map((item) => {
       const card = document.createElement("button");
@@ -245,7 +502,9 @@ function renderRequisitions(employee, requisitions = { catalog: [], history: [] 
       name.textContent = item.name;
       cost.textContent = `${item.cost} COMMENDATION${item.cost === 1 ? "" : "S"}`;
       card.append(visual, name, cost);
-      card.addEventListener("click", () => openRequisition(item, employee.commendations));
+      card.addEventListener("click", () =>
+        openRequisition(item, employee.commendations),
+      );
       return card;
     }),
   );

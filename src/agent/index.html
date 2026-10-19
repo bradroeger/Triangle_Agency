@@ -57,6 +57,7 @@
           <button data-tab="requisitions" type="button">REQUISITIONS</button>
           <button data-tab="pto" type="button">PAID TIME OFF</button>
           <button data-tab="record" type="button">EMPLOYEE RECORD</button>
+          <button data-tab="progress" type="button">PROGRESS</button>
         </nav>
         <section id="files-panel" class="tab-panel">
           <div id="file-groups"></div>
@@ -70,7 +71,11 @@
             Submit a requisition using your earned commendations. Approved
             requisitions remain Agency property where applicable.
           </p>
-          <p id="requisition-status" class="requisition-status" aria-live="polite"></p>
+          <p
+            id="requisition-status"
+            class="requisition-status"
+            aria-live="polite"
+          ></p>
           <div id="requisition-list" class="requisition-list"></div>
           <section class="requisition-history">
             <h3>SUBMITTED REQUISITIONS</h3>
@@ -83,9 +88,22 @@
             <h2>PAID TIME OFF REQUEST</h2>
           </div>
           <form id="pto-form" class="pto-form">
-            <label>START DATE <input id="pto-start-date" name="startDate" type="date" required /></label>
-            <label>END DATE <input id="pto-end-date" name="endDate" type="date" required /></label>
-            <label>NOTE FOR MANAGER (OPTIONAL)<textarea id="pto-reason" name="reason" maxlength="500" rows="4"></textarea></label>
+            <label
+              >START DATE
+              <input id="pto-start-date" name="startDate" type="date" required
+            /></label>
+            <label
+              >END DATE
+              <input id="pto-end-date" name="endDate" type="date" required
+            /></label>
+            <label
+              >NOTE FOR MANAGER (OPTIONAL)<textarea
+                id="pto-reason"
+                name="reason"
+                maxlength="500"
+                rows="4"
+              ></textarea>
+            </label>
             <button type="submit">FORWARD PTO REQUEST</button>
           </form>
           <p id="pto-status" class="pto-status" aria-live="polite"></p>
@@ -104,10 +122,18 @@
           </div>
           <p id="requisition-confirm-description"></p>
           <p id="requisition-confirm-cost" class="requisition-confirm-cost"></p>
-          <p id="requisition-confirm-message" class="requisition-confirm-message" aria-live="polite"></p>
+          <p
+            id="requisition-confirm-message"
+            class="requisition-confirm-message"
+            aria-live="polite"
+          ></p>
           <div class="requisition-confirm-actions">
-            <button id="requisition-confirm-cancel" type="button">CANCEL</button>
-            <button id="requisition-confirm-submit" type="button">CONFIRM REQUISITION</button>
+            <button id="requisition-confirm-cancel" type="button">
+              CANCEL
+            </button>
+            <button id="requisition-confirm-submit" type="button">
+              CONFIRM REQUISITION
+            </button>
           </div>
         </dialog>
         <section id="record-panel" class="tab-panel employee-record" hidden>
@@ -116,6 +142,16 @@
             <h2>EMPLOYEE RECORD</h2>
           </div>
           <dl id="employee-record-fields"></dl>
+        </section>
+        <section id="progress-panel" class="tab-panel progress-panel" hidden>
+          <div class="record-heading">
+            <span>PERSONNEL DEVELOPMENT // TRACKING</span>
+            <h2>PROGRESS</h2>
+          </div>
+          <p class="progress-note">
+            Marking a box crosses out one box from the end of each other track.
+          </p>
+          <div id="progress-tracks" aria-live="polite"></div>
         </section>
       </section>
       <section

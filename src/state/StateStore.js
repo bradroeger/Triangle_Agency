@@ -274,6 +274,36 @@ function validateState(state) {
         `Campaign state field "employees.${employeeId}.commendations" must be a non-negative integer.`,
       );
     }
+    if (override.progress !== undefined) {
+      requireObject(`employees.${employeeId}.progress`, override.progress);
+      for (const track of ["competency", "reality", "anomaly"]) {
+        const position = override.progress[track];
+        if (
+          position !== undefined &&
+          (!Number.isInteger(position) || position < 0 || position > 30)
+        ) {
+          throw new Error(
+            `Campaign state field "employees.${employeeId}.progress.${track}" must be an integer from 0 to 30.`,
+          );
+        }
+      }
+      for (const track of Object.keys(override.progress)) {
+        if (!["competency", "reality", "anomaly"].includes(track)) {
+          throw new Error(
+            `Campaign state field "employees.${employeeId}.progress.${track}" is not a supported track.`,
+          );
+        }
+      }
+      const totalMarks = ["competency", "reality", "anomaly"].reduce(
+        (sum, track) => sum + (override.progress[track] ?? 0),
+        0,
+      );
+      if (totalMarks > 30) {
+        throw new Error(
+          `Campaign state employee ${employeeId} has more than 30 total progression marks.`,
+        );
+      }
+    }
     for (const field of ["approvedDeviceId", "approvedDeviceLabel"]) {
       if (
         override[field] !== undefined &&
@@ -337,7 +367,10 @@ function validateState(state) {
         );
       }
       for (const requisition of override.requisitions) {
-        requireObject(`employees.${employeeId}.requisitions entry`, requisition);
+        requireObject(
+          `employees.${employeeId}.requisitions entry`,
+          requisition,
+        );
         for (const field of ["id", "itemId", "name", "requestedAt"]) {
           if (
             typeof requisition[field] !== "string" ||
@@ -375,7 +408,10 @@ function validateState(state) {
             `Campaign state PTO request status for ${employeeId} is invalid.`,
           );
         }
-        if (request.reason !== undefined && typeof request.reason !== "string") {
+        if (
+          request.reason !== undefined &&
+          typeof request.reason !== "string"
+        ) {
           throw new Error(
             `Campaign state PTO request reason for ${employeeId} must be a string.`,
           );
