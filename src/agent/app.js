@@ -1,5 +1,7 @@
+import { progressionTracks } from "./trackDefinitions.js";
+
 const employeeId = decodeURIComponent(location.pathname.split("/").pop());
-const socket = io();
+const socket = window.io();
 const locked = document.querySelector("#locked");
 const portal = document.querySelector("#portal");
 const groups = document.querySelector("#file-groups");
@@ -182,123 +184,6 @@ function selectTab(tab) {
     button.setAttribute("aria-pressed", String(button.dataset.tab === tab));
   }
 }
-
-// The Work/Life Balance sheet shows thirty boxes on each track.
-const progressionTracks = [
-  {
-    id: "competency",
-    name: "Competency",
-    positions: 30,
-    labels: [
-      "",
-      "",
-      "A3",
-      "",
-      "",
-      "D4",
-      "",
-      "",
-      "G3",
-      "",
-      "",
-      "J3",
-      "",
-      "",
-      "N3",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "Q3",
-      "",
-      "T3",
-      "",
-      "W8",
-      "",
-      "Y2",
-      "",
-    ],
-    ranks:
-      "Trainee · Associate · Sr. Associate · Assistant Director · Director · Chair · Executive VP · Senior VP · Vice President · Regional Director",
-  },
-  {
-    id: "reality",
-    name: "Reality",
-    positions: 30,
-    labels: [
-      "C4",
-      "",
-      "L11",
-      "",
-      "",
-      "",
-      "E2",
-      "",
-      "O4",
-      "",
-      "",
-      "",
-      "T6",
-      "",
-      "",
-      "V2",
-      "",
-      "X3",
-      "",
-      "H5",
-      "",
-      "",
-      "E3",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-    ],
-  },
-  {
-    id: "anomaly",
-    name: "Anomaly",
-    positions: 30,
-    labels: [
-      "H4",
-      "H3",
-      "",
-      "U2",
-      "",
-      "X2",
-      "",
-      "",
-      "",
-      "N1",
-      "",
-      "Q2",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "L10",
-      "",
-      "G8",
-      "",
-      "",
-      "A7",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-    ],
-  },
-];
 
 const mobileTrack = matchMedia("(max-width: 600px)");
 let lastProgress = {};

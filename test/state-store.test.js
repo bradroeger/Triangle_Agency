@@ -80,6 +80,36 @@ test("persists independent agent progress and rejects invalid positions", async 
   }
 });
 
+test("progress marks grant linked files without discarding manual assignments", async () => {
+  const area = await workspace();
+  try {
+    const store = await StateStore.load(area.file);
+    await store.applyEmployeeOverride("TA-1", {
+      playwallDocuments: ["playwall-agency-a1"],
+      seenPlaywallDocuments: [],
+    });
+    await store.setEmployeeProgress("TA-1", { competency: 3 }, [
+      "playwall-agency-a3",
+    ]);
+    let employee = store.getEmployeeOverride("TA-1");
+    assert.deepEqual(employee.playwallDocuments, [
+      "playwall-agency-a1",
+      "playwall-agency-a3",
+    ]);
+    assert.deepEqual(employee.progressPlaywallDocuments, [
+      "playwall-agency-a3",
+    ]);
+    assert.equal(store.isContentUnlocked("playwall-agency-a3"), true);
+
+    await store.setEmployeeProgress("TA-1", {}, []);
+    employee = store.getEmployeeOverride("TA-1");
+    assert.deepEqual(employee.playwallDocuments, ["playwall-agency-a1"]);
+    assert.deepEqual(employee.progressPlaywallDocuments, []);
+  } finally {
+    await rm(area.directory, { recursive: true });
+  }
+});
+
 test("rejects corrupt JSON and unsupported versions without overwriting", async () => {
   const area = await workspace();
   try {

@@ -15,10 +15,22 @@ Physical NFC use also requires a working PC/SC service and a compatible reader d
 
 ## Install
 
+On Windows, run the included first-run bootstrap from PowerShell in the project folder:
+
+```powershell
+./scripts/setup.ps1
+```
+
+It checks Node.js 22+, installs the locked npm dependencies with `npm ci`, validates the required data files, and creates missing empty log files without replacing campaign state or logs. Add `-Start` to launch the app after setup, or `-SkipInstall` when dependencies are already installed. The script reports the Smart Card service state but does not install drivers or change Windows services. If the native PC/SC dependency fails to compile, follow the Windows prerequisites below.
+
+For the optional ESP32 light controller, install Arduino CLI first, then run `./scripts/setup.ps1 -ConfigureArduino`. It asks for the Wi-Fi SSID and password (password entry is hidden), saves them only to Git-ignored `wifi_secrets.h` files, installs the ESP32 board core and Adafruit NeoPixel library, and compiles both sketches for `esp32:esp32:esp32da`. Connect the ESP32 and pass its port to upload, for example `./scripts/setup.ps1 -ConfigureArduino -ArduinoPort COM3`. The app's `ESP32_URL` must match the controller's network address. If a Wi-Fi password was previously committed or shared in source, change it on the router before configuring the new local headers.
+
+On macOS, install Node.js 22+ and run `npm ci`; the application creates its campaign state on first launch.
+
 ```powershell
 git clone <your-repository-url>
 cd Triangle_Agency
-npm ci
+./scripts/setup.ps1
 npm test
 npm start
 ```

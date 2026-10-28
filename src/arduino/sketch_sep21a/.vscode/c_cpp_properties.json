@@ -4,7 +4,7 @@
             "name": "esp32:esp32:esp32da",
             "includePath": [
                 "${workspaceFolder}/**",
-                "C:\\Users\\bradr\\AppData\\Local\\Temp\\vs-arduino-sketch-riXZjE\\sketch_sep21a",
+                "C:\\Users\\bradr\\AppData\\Local\\Temp\\vs-arduino-sketch-8RBlKl\\sketch_sep21a",
                 "C:\\Users\\bradr\\AppData\\Local\\Arduino15\\packages\\esp32\\tools\\esp32-libs\\3.3.12/qio_qspi/include",
                 "C:\\Users\\bradr\\AppData\\Local\\Arduino15\\packages\\esp32\\hardware\\esp32\\3.3.12\\cores\\esp32",
                 "C:\\Users\\bradr\\AppData\\Local\\Arduino15\\packages\\esp32\\hardware\\esp32\\3.3.12\\variants\\esp32da",
@@ -13,7 +13,6 @@
                 "C:\\Users\\bradr\\AppData\\Local\\Arduino15\\packages\\esp32\\hardware\\esp32\\3.3.12\\libraries\\WebServer\\src",
                 "C:\\Users\\bradr\\AppData\\Local\\Arduino15\\packages\\esp32\\hardware\\esp32\\3.3.12\\libraries\\FS\\src",
                 "c:\\Users\\bradr\\Documents\\Arduino\\libraries\\Adafruit_NeoPixel",
-                "C:\\Users\\bradr\\AppData\\Local\\Arduino15\\packages\\esp32\\hardware\\esp32\\3.3.12\\libraries\\Hash\\src",
                 "C:\\Users\\bradr\\AppData\\Local\\Arduino15\\packages\\esp32\\tools\\esp-x32\\2601\\xtensa-esp32-elf\\include"
             ],
             "forcedInclude": [

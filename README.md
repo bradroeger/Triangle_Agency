@@ -66,12 +66,14 @@ Install the current Node.js LTS release using the official Node.js installer. ma
 
 ## Install and run
 
-Open PowerShell in this project folder:
+Open PowerShell in this project folder and run the first-run setup script (or use `npm run setup`):
 
 ```powershell
-npm install
+./scripts/setup.ps1
 npm start
 ```
+
+To configure and compile the optional ESP32 controller as well, install Arduino CLI and run `./scripts/setup.ps1 -ConfigureArduino`. The script prompts for Wi-Fi credentials and stores them in ignored local headers. Add `-ArduinoPort COM3` (using the device's actual port) to upload firmware after compilation. Rotate any Wi-Fi password that was previously stored in source control.
 
 The terminal prints reader activity and opens `http://localhost:3000/office` in the default browser. If automatic opening fails, enter that address manually. The main identification terminal remains available at `http://localhost:3000`. Closing the browser does not stop the Node process; reopen either address at any time. Stop the process with Ctrl+C.
 

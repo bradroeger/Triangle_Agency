@@ -1,13 +1,14 @@
 #include <WiFi.h>
 #include <WebServer.h>
 #include <Adafruit_NeoPixel.h>
+#include "wifi_secrets.h"
 
 // ============================================================
 // WIFI
 // ============================================================
 
-const char* ssid = "CHANGE_ME";
-const char* password = "CHANGE_ME";
+const char* ssid = WIFI_SSID;
+const char* password = WIFI_PASSWORD;
 
 WebServer server(80);
 

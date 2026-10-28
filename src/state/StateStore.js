@@ -95,6 +95,42 @@ export class StateStore {
     });
   }
 
+  async setEmployeeProgress(employeeId, progress, progressDocuments) {
+    return this.mutate((draft) => {
+      const current = draft.employees[employeeId] ?? {};
+      const previousProgressDocuments = new Set(
+        current.progressPlaywallDocuments ?? [],
+      );
+      const manualDocuments = new Set(
+        current.manualPlaywallDocuments ??
+          (current.playwallDocuments ?? []).filter(
+            (contentId) => !previousProgressDocuments.has(contentId),
+          ),
+      );
+      const nextProgressDocuments = new Set(progressDocuments);
+      const playwallDocuments = new Set([
+        ...manualDocuments,
+        ...nextProgressDocuments,
+      ]);
+      const seenPlaywallDocuments = (
+        current.seenPlaywallDocuments ?? []
+      ).filter((contentId) => playwallDocuments.has(contentId));
+      draft.employees[employeeId] = {
+        ...current,
+        progress: structuredClone(progress),
+        manualPlaywallDocuments: [...manualDocuments].sort(),
+        progressPlaywallDocuments: [...nextProgressDocuments].sort(),
+        playwallDocuments: [...playwallDocuments].sort(),
+        seenPlaywallDocuments,
+      };
+      for (const contentId of nextProgressDocuments) {
+        if (!draft.unlockedContent.includes(contentId)) {
+          draft.unlockedContent.push(contentId);
+        }
+      }
+    });
+  }
+
   async setMissionMvp(employeeId, enabled) {
     return this.mutate((draft) => {
       for (const override of Object.values(draft.employees)) {
@@ -348,6 +384,36 @@ function validateState(state) {
         `employees.${employeeId}.seenPlaywallDocuments`,
         override.seenPlaywallDocuments,
       );
+    }
+    if (override.progressPlaywallDocuments !== undefined) {
+      validateResourceIds(
+        `employees.${employeeId}.progressPlaywallDocuments`,
+        override.progressPlaywallDocuments,
+      );
+      if (
+        override.progressPlaywallDocuments.some(
+          (contentId) => !override.playwallDocuments?.includes(contentId),
+        )
+      ) {
+        throw new Error(
+          `Campaign state employee ${employeeId} has an unassigned progression Playwall document.`,
+        );
+      }
+    }
+    if (override.manualPlaywallDocuments !== undefined) {
+      validateResourceIds(
+        `employees.${employeeId}.manualPlaywallDocuments`,
+        override.manualPlaywallDocuments,
+      );
+      if (
+        override.manualPlaywallDocuments.some(
+          (contentId) => !override.playwallDocuments?.includes(contentId),
+        )
+      ) {
+        throw new Error(
+          `Campaign state employee ${employeeId} has an unassigned manual Playwall document.`,
+        );
+      }
     }
     if (override.reminders !== undefined) {
       validateStringArray(

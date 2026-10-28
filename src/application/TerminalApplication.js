@@ -5,6 +5,7 @@ import {
 } from "../access/evaluateAccess.js";
 import { mergeEmployee, mergeResource } from "../state/effectiveRecords.js";
 import { buildEmployeeNumber } from "../employees/employeeIdentifiers.js";
+import { getProgressionDesignations } from "../agent/trackDefinitions.js";
 import {
   getRequisitionItem,
   listRequisitionItems,
@@ -233,9 +234,22 @@ export class TerminalApplication {
         "No boxes remain on this track; marks on other tracks remove its end boxes.",
       );
     }
-    await this.#stateStore.applyEmployeeOverride(employeeId, {
-      progress: { ...current, [track]: position },
-    });
+    const progress = { ...current, [track]: position };
+    const designations = getProgressionDesignations(progress);
+    const playwallMatches = this.#contentRegistry
+      .listMetadata()
+      .filter((content) => {
+        const designation = content.id.match(
+          /^playwall-(?:agency|anomaly|reality)-([a-z]+\d+)$/,
+        )?.[1];
+        return designation && designations.has(designation);
+      })
+      .map((content) => content.id);
+    await this.#stateStore.setEmployeeProgress(
+      employeeId,
+      progress,
+      playwallMatches,
+    );
     return this.getEmployeeProgress(employeeId);
   }
 
@@ -367,8 +381,12 @@ export class TerminalApplication {
     if (contentId.startsWith("playwall-anomaly-")) {
       const assigned = new Set(override.playwallDocuments ?? []);
       const seen = new Set(override.seenPlaywallDocuments ?? []);
-      assigned.delete(contentId);
-      seen.delete(contentId);
+      if (override.progressPlaywallDocuments?.includes(contentId)) {
+        seen.add(contentId);
+      } else {
+        assigned.delete(contentId);
+        seen.delete(contentId);
+      }
       await this.#stateStore.applyEmployeeOverride(employeeId, {
         playwallDocuments: [...assigned].sort(),
         seenPlaywallDocuments: [...seen].sort(),
@@ -544,13 +562,23 @@ export class TerminalApplication {
     const override = this.#stateStore.getEmployeeOverride(employeeId);
     const assigned = new Set(override.playwallDocuments ?? []);
     const seen = new Set(override.seenPlaywallDocuments ?? []);
+    const progressAssigned = new Set(override.progressPlaywallDocuments ?? []);
+    const manualAssigned = new Set(
+      override.manualPlaywallDocuments ??
+        [...assigned].filter((id) => !progressAssigned.has(id)),
+    );
     if (grant) assigned.add(contentId);
     else {
-      assigned.delete(contentId);
-      seen.delete(contentId);
+      if (!progressAssigned.has(contentId)) {
+        assigned.delete(contentId);
+        seen.delete(contentId);
+      }
     }
+    if (grant) manualAssigned.add(contentId);
+    else manualAssigned.delete(contentId);
     await this.#stateStore.applyEmployeeOverride(employeeId, {
       playwallDocuments: [...assigned].sort(),
+      manualPlaywallDocuments: [...manualAssigned].sort(),
       seenPlaywallDocuments: [...seen].sort(),
     });
     if (grant) await this.#stateStore.unlockContent(contentId);

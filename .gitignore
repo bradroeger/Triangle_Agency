@@ -2,6 +2,8 @@ node_modules/
 .DS_Store
 npm-debug.log*
 .env
+wifi_secrets.h
+src/arduino/sketch_sep21a/wifi_secrets.h
 coverage/
 
 # Copyrighted Triangle Agency source material and generated derivatives.
