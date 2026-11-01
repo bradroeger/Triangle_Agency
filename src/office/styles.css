@@ -460,6 +460,11 @@ button.enabled {
   font-size: clamp(1.5rem, 5vw, 3.5rem);
   font-weight: 900;
 }
+.waiting.login-failed {
+  color: #17110f;
+  border-style: double;
+  border-color: var(--red);
+}
 .terminal-impact main {
   transform: translate(22px, -13px) rotate(0.8deg) skewX(-4deg);
   filter: saturate(2.4) contrast(1.6) hue-rotate(40deg);

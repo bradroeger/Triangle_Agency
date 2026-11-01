@@ -301,6 +301,14 @@ socket.on("employee-logout", ({ employee, message }) => {
   instructionElement.hidden = false;
   addEvent(`${employee.name} signed out`);
 });
+socket.on("agent-login-failed", () => {
+  showWaitingState();
+  statusElement.textContent = "LOGIN FAILED";
+  instructionElement.textContent =
+    "No session was established. Present identification again to retry.";
+  instructionElement.hidden = false;
+  addEvent("Glitched login failed; no agent session was created");
+});
 socket.on("display-reset", showWaitingState);
 socket.on("terminal-error", ({ message }) => {
   addEvent(`ERROR: ${message}`);

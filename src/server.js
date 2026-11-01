@@ -125,6 +125,7 @@ let displayRevision = 0;
 let shuttingDown = false;
 let anomalyInputBlocked = false;
 let anomalyFailsafe;
+let anomalyLoginEmployeeId;
 let esp32CommandQueue = Promise.resolve();
 
 app.use(express.json({ limit: "16kb" }));
@@ -171,6 +172,10 @@ app.use(
   express.static(
     fileURLToPath(new URL("../data/assets/office", import.meta.url)),
   ),
+);
+app.use(
+  "/office-audio",
+  express.static(fileURLToPath(new URL("../data/assets/audio", import.meta.url))),
 );
 app.use(
   "/requisition-media",
@@ -518,13 +523,13 @@ app.post("/api/anomaly-sequence-boot", async (_request, response) => {
 });
 
 app.post("/api/anomaly-sequence-complete", async (_request, response) => {
-  await finishAnomalyInputBlock("sequence complete");
-  response.json({ ok: true });
+  const result = await finishAnomalyInputBlock("sequence complete");
+  response.json({ ok: true, ...result });
 });
 
 app.post("/api/anomaly-sequence-cancel", async (_request, response) => {
-  await finishAnomalyInputBlock("sequence cancelled");
-  response.json({ ok: true });
+  const result = await finishAnomalyInputBlock("sequence cancelled");
+  response.json({ ok: true, ...result });
 });
 
 app.post("/__resource-selection", (request, response) => {
@@ -923,18 +928,29 @@ async function handleBadgeScanned({ readerId, uid, simulated }) {
     interaction: result,
   };
   if (result.employee) {
-    const agentPortalOrigin =
-      localNetworkOrigins()[0] ?? `http://localhost:${port}`;
-    const agentUrl = new URL(
-      `/agent/${encodeURIComponent(result.employee.employeeId)}`,
-      `${agentPortalOrigin}/`,
-    ).href;
-    currentBadge.agentUrl = agentUrl;
-    currentBadge.agentQrSvg = createOfficeQrSvg(agentUrl);
-    queueEsp32Command("login").catch((error) => {
-      console.warn(`Could not activate ESP32 login lights: ${error.message}`);
-    });
-    unlockAgentPortal(result.employee.employeeId);
+    const gmSelection = gmMessageRegistry.findForEmployee(
+      result.employee.employeeId,
+    );
+    const glitchedLogin = gmSelection.category === "unhinged";
+    let agentUrl;
+    let agentQrSvg;
+    if (glitchedLogin) {
+      beginAnomalyInputBlock(result.employee.employeeId);
+    } else {
+      const agentPortalOrigin =
+        localNetworkOrigins()[0] ?? `http://localhost:${port}`;
+      agentUrl = new URL(
+        `/agent/${encodeURIComponent(result.employee.employeeId)}`,
+        `${agentPortalOrigin}/`,
+      ).href;
+      agentQrSvg = createOfficeQrSvg(agentUrl);
+      currentBadge.agentUrl = agentUrl;
+      currentBadge.agentQrSvg = agentQrSvg;
+      queueEsp32Command("login").catch((error) => {
+        console.warn(`Could not activate ESP32 login lights: ${error.message}`);
+      });
+      unlockAgentPortal(result.employee.employeeId);
+    }
     const unresolvedFiles = listUnresolvedPlaywallFiles(
       result.employee.employeeId,
     );
@@ -943,12 +959,8 @@ async function handleBadgeScanned({ readerId, uid, simulated }) {
       result.employee.employeeId,
     );
     currentBadge.reminders = reminders;
-    const gmSelection = gmMessageRegistry.findForEmployee(
-      result.employee.employeeId,
-    );
     currentBadge.gmMessage = gmSelection.message;
     currentBadge.gmMessageCategory = gmSelection.category;
-    if (gmSelection.category === "unhinged") beginAnomalyInputBlock();
     console.log(`Employee identified: ${result.employee.employeeId}`);
     io.emit("employee-identified", {
       ...badge,
@@ -961,8 +973,8 @@ async function handleBadgeScanned({ readerId, uid, simulated }) {
       gmMessageCategory: gmSelection.category,
       unresolvedFiles,
       reminders,
-      agentUrl: currentBadge.agentUrl,
-      agentQrSvg: currentBadge.agentQrSvg,
+      agentUrl,
+      agentQrSvg,
     });
     const agencyDocuments = terminalApplication.listEmployeePlaywallContent(
       result.employee.employeeId,
@@ -1072,8 +1084,9 @@ function handleBadgeRemoved({ readerId, uid }) {
   }, 10_000);
 }
 
-function beginAnomalyInputBlock() {
+function beginAnomalyInputBlock(employeeId) {
   anomalyInputBlocked = true;
+  anomalyLoginEmployeeId = employeeId;
   clearTimeout(anomalyFailsafe);
   anomalyFailsafe = setTimeout(() => {
     console.warn("Anomaly input block released by safety timeout.");
@@ -1087,16 +1100,27 @@ function finishAnomalyInputBlock(reason) {
   const lightReset = queueEsp32Command("startup").catch((error) => {
     console.warn(`Could not reset ESP32 lights: ${error.message}`);
   });
-  if (!anomalyInputBlocked) return lightReset;
+  if (!anomalyInputBlocked)
+    return lightReset.then(() => ({ loginFailed: false }));
   anomalyInputBlocked = false;
   clearTimeout(anomalyFailsafe);
   anomalyFailsafe = undefined;
+  const loginFailedEmployeeId = anomalyLoginEmployeeId;
+  anomalyLoginEmployeeId = undefined;
+  if (loginFailedEmployeeId) {
+    lockAgentPortal(loginFailedEmployeeId, "ANOMALOUS_LOGIN_FAILURE");
+  }
   displayRevision += 1;
   currentBadge = null;
   console.log(`Badge input restored (${reason}).`);
   io.emit("display-reset");
   io.emit("input-restored");
-  return lightReset;
+  if (loginFailedEmployeeId) {
+    io.emit("agent-login-failed", { employeeId: loginFailedEmployeeId });
+  }
+  return lightReset.then(() => ({
+    loginFailed: Boolean(loginFailedEmployeeId),
+  }));
 }
 
 function queueEsp32Command(command) {

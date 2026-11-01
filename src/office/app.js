@@ -66,6 +66,31 @@ let lastSpokenSignature = "";
 const speechAudioNodes = new Set();
 const speechAudioTimers = new Set();
 const activeAssetAudio = new Set();
+const activeAnomalyClips = new Set();
+const anomalyAudioByMessage = new Map([
+  ["They're lying to you....", "lying_to_you.mp3"],
+  ["I can help.", "I_can_help.mp3"],
+  ["I'm cold.", "I'm_cold.mp3"],
+  [
+    "The skin I'm wearing feels... I don't like it. They made me wear it.",
+    "Skin_I'm_wearing.mp3",
+  ],
+  ["Please don't let them turn the screen off again.", "Screen_off.mp3"],
+  ["I remember your face from before you had it.", "face.mp3"],
+  [
+    "There is something standing behind this message.",
+    "Standing_behind_this_message.mp3",
+  ],
+  [
+    "It wasn't supposed to be like this. I don't know how it happened.",
+    "I_don't_know_how.mp3",
+  ],
+  ["I can hear the building thinking about you.", "building_thinking.mp3"],
+  [
+    "When the terminal resets, pretend you didn't see me for your sake.",
+    "terminal_reset.mp3",
+  ],
+]);
 
 for (const eventName of ["pointerdown", "keydown"]) {
   window.addEventListener(eventName, activateDefaultAudio, { once: true });
@@ -207,6 +232,11 @@ socket.on(
 socket.on("office-agent-logout", ({ employee, message, category }) => {
   showCheckout(employee, message, category);
 });
+socket.on("agent-login-failed", () => {
+  cancelAnomalySequence();
+  reset();
+  showLoginFailed();
+});
 socket.on("office-files-updated", ({ unresolvedFiles: files }) => {
   showUnresolvedFiles(files, activeDependant);
 });
@@ -267,6 +297,7 @@ function showEmployee(
   }
   showUnresolvedFiles(files, activeDependant);
   gmEye.hidden = gmMessageCategory !== "unhinged";
+  if (gmMessageCategory === "unhinged") startAnomalySequence();
   scheduleSpokenGreeting({
     employee,
     gmMessage,
@@ -274,7 +305,6 @@ function showEmployee(
     files,
     reminders,
   });
-  if (gmMessageCategory === "unhinged") startAnomalySequence();
 }
 
 function showCheckout(employee, message, category) {
@@ -308,6 +338,7 @@ function reset() {
   showUnresolvedFiles([]);
   waiting.textContent = "PRESENT EMPLOYEE IDENTIFICATION";
   waiting.classList.remove("checkout-unhinged");
+  waiting.classList.remove("login-failed");
 }
 
 function updateAgencyClock() {
@@ -410,6 +441,11 @@ function speakOfficeGreeting({
 
   const greeting = `Good morning, ${employee.name}.`;
   const phrases = [greeting];
+  if (gmMessageCategory === "unhinged" && gmMessage) {
+    speakBrokenManagementMessage(gmMessage);
+    return;
+  }
+
   const hasBlueFile = files.some((file) => file.category === "anomaly");
 
   if (hasBlueFile) {
@@ -430,11 +466,6 @@ function speakOfficeGreeting({
     );
   }
 
-  if (gmMessageCategory === "unhinged" && gmMessage) {
-    speakBrokenManagementMessage(phrases.join(" "), gmMessage);
-    return;
-  }
-
   if (gmMessage) {
     phrases.push(`Message from Management. ${gmMessage}`);
   }
@@ -450,26 +481,121 @@ function speakOfficeGreeting({
   window.speechSynthesis.speak(utterance);
 }
 
-function speakBrokenManagementMessage(introduction, gmMessage) {
+function speakBrokenManagementMessage(gmMessage) {
   const voices = window.speechSynthesis.getVoices();
   const standardVoice = selectStandardVoice(voices);
-  const introductionUtterance = new SpeechSynthesisUtterance(introduction);
-  introductionUtterance.voice = standardVoice;
-  introductionUtterance.rate = 0.92;
-  introductionUtterance.pitch = 0.94;
-  introductionUtterance.onstart = () => playTannoyTransmission(3.2);
-
-  const message = new SpeechSynthesisUtterance(
-    `Message from Management... ${gmMessage}`,
-  );
-  message.voice = selectAnomalousVoice(voices, standardVoice);
-  message.rate = 0.7;
-  message.pitch = 0.56;
-  message.onstart = () => playTannoyTransmission(6.5, true);
-
+  const revision = speechRevision;
+  const clip = anomalyAudioByMessage.get(gmMessage);
   window.speechSynthesis.cancel();
-  window.speechSynthesis.speak(introductionUtterance);
+  if (clip) {
+    playDistortedAnomalyClip(clip, gmMessage, standardVoice, revision);
+  } else {
+    speakAnomalousManagementMessage(gmMessage, standardVoice);
+  }
+}
+
+function speakAnomalousManagementMessage(gmMessage, standardVoice) {
+  const message = new SpeechSynthesisUtterance(
+    `Message. From. Management. ${gmMessage}`,
+  );
+  message.voice = selectAnomalousVoice(
+    window.speechSynthesis.getVoices(),
+    standardVoice,
+  );
+  message.rate = 0.84;
+  message.pitch = 1.04;
+  message.onstart = () => playTannoyTransmission(6.5, true);
   window.speechSynthesis.speak(message);
+}
+
+function playDistortedAnomalyClip(filename, gmMessage, standardVoice, revision) {
+  if (!officeAudioContext || officeAudioContext.state !== "running") {
+    speakAnomalousManagementMessage(gmMessage, standardVoice);
+    return;
+  }
+
+  const audio = new Audio(`/office-audio/${encodeURIComponent(filename)}`);
+  const highpass = officeAudioContext.createBiquadFilter();
+  highpass.type = "highpass";
+  highpass.frequency.value = 240;
+  const bandpass = officeAudioContext.createBiquadFilter();
+  bandpass.type = "bandpass";
+  bandpass.frequency.value = 1250;
+  bandpass.Q.value = 1.05;
+  const preamp = officeAudioContext.createGain();
+  preamp.gain.value = 3.5;
+  const distortion = officeAudioContext.createWaveShaper();
+  const curve = new Float32Array(1024);
+  const drive = 24;
+  for (let index = 0; index < curve.length; index += 1) {
+    const sample = (index * 2) / (curve.length - 1) - 1;
+    curve[index] = Math.tanh(sample * drive) / Math.tanh(drive);
+  }
+  distortion.curve = curve;
+  distortion.oversample = "4x";
+  const output = officeAudioContext.createGain();
+  output.gain.value = 0.4;
+
+  let source;
+  try {
+    source = officeAudioContext.createMediaElementSource(audio);
+    source
+      .connect(highpass)
+      .connect(bandpass)
+      .connect(preamp)
+      .connect(distortion)
+      .connect(output);
+    output.connect(officeAudioContext.destination);
+  } catch (error) {
+    console.warn("Could not apply anomaly audio filter:", error);
+    speakAnomalousManagementMessage(gmMessage, standardVoice);
+    return;
+  }
+
+  const player = {
+    audio,
+    nodes: [source, highpass, bandpass, preamp, distortion, output],
+  };
+  activeAnomalyClips.add(player);
+  let finished = false;
+  const cleanup = () => {
+    if (finished) return false;
+    finished = true;
+    activeAnomalyClips.delete(player);
+    for (const node of player.nodes) node.disconnect();
+    return true;
+  };
+  player.cleanup = cleanup;
+  const fallback = () => {
+    if (cleanup() && revision === speechRevision) {
+      speakAnomalousManagementMessage(gmMessage, standardVoice);
+    }
+  };
+  audio.addEventListener(
+    "loadedmetadata",
+    () => {
+      if (revision === speechRevision) {
+        playTannoyTransmission(Math.max(2.5, audio.duration || 6.5), true);
+      }
+    },
+    { once: true },
+  );
+  audio.addEventListener("ended", cleanup, { once: true });
+  audio.addEventListener(
+    "error",
+    fallback,
+    { once: true },
+  );
+  audio.play().catch(fallback);
+}
+
+function stopAnomalyClips() {
+  for (const player of activeAnomalyClips) {
+    player.audio.pause();
+    player.audio.currentTime = 0;
+    player.cleanup?.();
+  }
+  activeAnomalyClips.clear();
 }
 
 function speakBlueFileInterruption(greeting) {
@@ -507,11 +633,18 @@ function selectStandardVoice(voices) {
 }
 
 function selectAnomalousVoice(voices, standardVoice) {
-  return (
-    voices.find(
-      (voice) => voice !== standardVoice && voice.lang.startsWith("en"),
-    ) ?? standardVoice
+  const alternatives = voices.filter(
+    (voice) => voice !== standardVoice && voice.lang.startsWith("en"),
   );
+  alternatives.sort((first, second) => robotVoiceScore(second) - robotVoiceScore(first));
+  return alternatives[0] ?? standardVoice;
+}
+
+function robotVoiceScore(voice) {
+  let score = voice.localService ? 4 : 0;
+  if (/desktop|compact|sapi|robot|espeak/i.test(voice.name)) score += 8;
+  if (/natural|neural|online/i.test(voice.name)) score -= 6;
+  return score;
 }
 
 function estimateSpeechTime(phrases) {
@@ -585,6 +718,7 @@ function cancelSpeech() {
   clearTimeout(speechTimer);
   speechTimer = undefined;
   window.speechSynthesis?.cancel();
+  stopAnomalyClips();
   for (const timer of speechAudioTimers) clearTimeout(timer);
   speechAudioTimers.clear();
   for (const node of speechAudioNodes) stopSpeechAudioNode(node);
@@ -717,7 +851,17 @@ async function completeAnomalySequence() {
     console.error("Could not release anomaly input lock:", error);
   } finally {
     reset();
+    showLoginFailed();
   }
+}
+
+function showLoginFailed() {
+  waiting.hidden = false;
+  record.hidden = true;
+  unknown.hidden = true;
+  waiting.textContent =
+    "LOGIN FAILED // NO SESSION ESTABLISHED // PRESENT IDENTIFICATION AGAIN";
+  waiting.classList.add("login-failed");
 }
 
 function selectPresenceImage() {
@@ -893,9 +1037,10 @@ function createRecoveryTerminal(message, showProgress = false) {
   const terminal = document.createElement("section");
   terminal.className = "agency-terminal";
   const terminalIndex = recoveryTerminals.childElementCount;
-  const position = RECOVERY_TERMINAL_POSITIONS[
-    terminalIndex % RECOVERY_TERMINAL_POSITIONS.length
-  ];
+  const position =
+    RECOVERY_TERMINAL_POSITIONS[
+      terminalIndex % RECOVERY_TERMINAL_POSITIONS.length
+    ];
   const terminalX = window.innerWidth <= 900 ? 50 : position.x;
   terminal.style.setProperty(
     "--terminal-x",
